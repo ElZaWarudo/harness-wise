@@ -101,7 +101,11 @@ Before returning the harness, verify:
 - Technical uncertainty is labeled as an assumption or deferred verification.
 - Context sections explain why each file or doc matters.
 - Existing documents were checked for task-specific summary opportunities, or the harness states why none apply.
+- Reading scope is bounded enough for the task, with broad areas narrowed by symbols, entry points, or explicit conditions.
+- Material claims distinguish inspected evidence from assumptions, inference, or deferred verification.
 - Guardrails are derived from observed patterns or clearly marked assumptions.
+- Validation guidance matches the task risk and affected surfaces.
+- For sensitive actions, the harness asks the next agent to summarize intended changes before acting; require human approval only for destructive changes, external-system effects, or work that cannot be recovered with git.
 - The harness does not ask the next agent to read broad directories without a reason.
 
 If an existing harness was supplied, use `harness-review.md` before filling this template from scratch.

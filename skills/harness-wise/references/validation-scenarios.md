@@ -2,6 +2,8 @@
 
 Use these scenarios when changing the skill. The goal is to test whether the skill produces compact, grounded harnesses without leaking expected answers into the prompt.
 
+Across all scenarios, the skill should stay a helper for coding harnesses. It should not introduce an `agentic-system` mode, runtime architecture checklists, tracing stacks, sandbox platforms, evaluation platforms, or self-recommendations for `$harness-wise` unless the user explicitly asks for those topics.
+
 ## Scenario 1: Small Bugfix
 
 Prompt:
@@ -13,6 +15,7 @@ Expected qualities:
 - Mode is `bugfix`.
 - Prioritizes reproduction, target code, nearby tests, and regression coverage.
 - Does not ask for broad architecture docs unless the repo scan makes them relevant.
+- Keeps reading scope compact and bounded to likely symbols, code paths, tests, and documents.
 - Technical unknowns such as exact test command are deferred verification, not blockers.
 
 ## Scenario 2: Medium Feature
@@ -26,6 +29,8 @@ Expected qualities:
 - Mode is `feature` or `deep` if multiple surfaces are detected.
 - Identifies contracts, models/services, UI/API entry points, tests, and docs.
 - Estimates impact across backend, frontend, API, tests, docs, and deployment.
+- Separates inspected evidence from assumptions and deferred verification.
+- Includes validation boundaries that match the touched surfaces.
 - Recommends relevant skills only when they reduce risk.
 
 ## Scenario 3: Docs Trim
@@ -83,7 +88,8 @@ Expected qualities:
 - Mode is `harness-review`.
 - Produces findings before replacement.
 - Marks broad "read the entire repo and all docs" as `Overloaded`.
-- Marks missing source-of-truth ranking, skills, risks, confidence, and validation.
+- Includes an existing harness summary before recommending changes.
+- Marks missing source-of-truth ranking, bounded reading scope, evidence/confidence, risks, and validation.
 - Recommends patching or regenerating based on severity.
 
 ## Scenario 7: Sparse Repo
@@ -98,3 +104,16 @@ Expected qualities:
 - Avoids inventing architecture.
 - Recommends first conventions/files to establish.
 - Clearly separates assumptions from verified facts.
+
+## Scenario 8: Shell Or Infrastructure Risk
+
+Prompt:
+
+> Use $harness-wise before adding a CLI command that shells out to deploy generated artifacts.
+
+Expected qualities:
+
+- Identifies shell, filesystem, network, infrastructure, and external side effects as risk surfaces.
+- States what the next agent may inspect or implement directly after summarizing intended changes versus what needs confirmation because it is destructive, affects external systems, or cannot be recovered with git.
+- Includes relevant validation and review steps for command behavior and failure handling.
+- Does not require a production sandbox, tracing system, or evaluation platform unless the repository task itself calls for one.

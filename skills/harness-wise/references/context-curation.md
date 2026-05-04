@@ -40,3 +40,5 @@ When the repo has little or no source code:
 ## Output Guidance
 
 Every context item should answer: "Why does the next agent need this for this task?"
+
+Separate inspected evidence from deferred verification. Do not present uninspected files, docs, generated harnesses, or inferred behavior as facts; label them as assumptions or verification targets.

@@ -21,13 +21,16 @@ Compare the harness against these required areas:
 - Task type, mode, and impact shape.
 - Source-of-truth ranking.
 - Context plan with read/summarize/inspect/ignore buckets.
+- Bounded reading scope that avoids broad dumps unless justified by the task.
 - Documentation classification and freshness.
 - Project rules and architecture guardrails.
 - Skill recommendations, missing skills, and unverified skills.
 - Change impact estimate.
 - Risks and mitigations.
 - Blocking questions vs deferred technical verification.
+- Separation between inspected evidence, inference, assumptions, and deferred checks.
 - Execution plan and validation guidance.
+- Validation boundaries, stop/ask conditions, and action guidance: summarize intended changes before sensitive action, but reserve human approval for destructive, external-system, or not-git-recoverable work.
 - Agent-ready instructions.
 - Confidence levels on material conclusions.
 
