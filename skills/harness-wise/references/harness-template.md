@@ -102,6 +102,8 @@ Before returning the harness, verify:
 - Context sections explain why each file or doc matters.
 - Existing documents were checked for task-specific summary opportunities, or the harness states why none apply.
 - Reading scope is bounded enough for the task, with broad areas narrowed by symbols, entry points, or explicit conditions.
+- Task-relevant project structure, module relationships, or conventions are summarized when they materially improve the handoff.
+- Persistent project maps, convention docs, or saved harness files are framed as opt-in follow-up proposals, not as already-created artifacts.
 - Material claims distinguish inspected evidence from assumptions, inference, or deferred verification.
 - Guardrails are derived from observed patterns or clearly marked assumptions.
 - Validation guidance matches the task risk and affected surfaces.

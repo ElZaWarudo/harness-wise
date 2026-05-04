@@ -36,10 +36,11 @@ It includes:
 - `references/harness-template.md`: the Coding Harness output contract.
 - `references/task-classification.md`: feature, bugfix, refactor, migration, review, security, and related task typing.
 - `references/modes.md`: quick, deep, bugfix, feature, refactor, skill-audit, harness-review, and docs-trim behavior.
-- `references/context-curation.md`: anti-context-bloat rules.
+- `references/context-curation.md`: anti-context-bloat rules and task-relevant project intelligence.
 - `references/document-classification.md`: KEEP, SUMMARIZE, IGNORE, STALE, and ASK/VERIFY labels.
 - `references/confidence-rubric.md`: high, medium, low, and unknown confidence labels.
 - `references/skill-selection.md`: available, missing, review-only, and unverified skill recommendations.
+- `references/impact-estimation.md`: impact matrix, risk surfaces, validation depth, and action boundaries.
 - `references/harness-review.md`: review mode for an existing harness.
 - `references/validation-scenarios.md`: prompts for forward-testing changes to the skill.
 
@@ -49,8 +50,8 @@ Harness Wise uses progressive disclosure:
 
 ```text
 task -> classify -> scan lightly -> curate context -> extract patterns
-     -> recommend skills -> estimate impact -> ask only blocking questions
-     -> emit harness or review existing harness
+     -> surface project intelligence -> recommend skills -> estimate impact
+     -> ask only blocking questions -> emit harness or review existing harness
 ```
 
 The main skill file stays small. Detailed rubrics live in `references/` and are loaded only when relevant. This is intentional. A context-saving skill that starts by dumping every rule into context has already lost the plot.
@@ -144,6 +145,43 @@ Point a compatible agent at the skill:
 ```text
 Use $harness-wise before implementing CSV export for invoices.
 ```
+
+## What You Can Ask It To Do
+
+Harness Wise can do more than fill a template. It can help the agent build enough project intelligence to work carefully without dragging the whole repo into context.
+
+Useful prompts:
+
+```text
+Use $harness-wise before fixing the failed invoice total calculation.
+```
+
+```text
+Use $harness-wise to map the project structure and conventions before adding billing reports.
+```
+
+```text
+Use $harness-wise docs-trim before working on billing so the next agent knows which docs matter.
+```
+
+```text
+Use $harness-wise skill-audit for a migration that needs backward compatibility.
+```
+
+```text
+Use $harness-wise to prepare a risk-aware handoff before touching deploy scripts.
+```
+
+It can surface:
+
+- Task-relevant project maps: entry points, modules, commands, tests, and docs that matter for the requested work.
+- Convention summaries: observed structure, naming, testing, dependency, and error-handling patterns the next agent should follow.
+- Documentation triage: docs to keep, summarize, ignore, verify, or treat as stale.
+- Skill coverage: relevant available skills, missing expertise, review-only skills, and unverified recommendations.
+- Risk and impact estimates: affected surfaces, validation needs, action boundaries, and blocking product questions.
+- Existing harness reviews: findings, compact operational summaries, and minimal patches or regeneration triggers.
+
+Most outputs are conversational harnesses or reviews. Persistent artifacts are opt-in: it may propose `docs/project-map.md`, `docs/conventions.md`, or a saved task harness when repeated future work would benefit, but actual file writing belongs in a follow-up planning or work step after you explicitly ask.
 
 Or review an existing harness:
 

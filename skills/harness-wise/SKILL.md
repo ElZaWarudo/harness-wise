@@ -1,6 +1,6 @@
 ---
 name: harness-wise
-description: Build or review a compact, architecture-aware coding harness before implementation. Use when a user asks to prepare a coding agent before work, curate repository context, reduce token waste, select relevant skills, review an existing harness, audit skill coverage, trim documentation context, or avoid premature coding on feature, bugfix, refactor, migration, integration, testing, documentation, security, or architecture work.
+description: Build or review a compact, architecture-aware coding harness before implementation. Use when a user asks to prepare a coding agent before work, map task-relevant project structure, summarize repository conventions, curate context, reduce token waste, select relevant skills, review an existing harness, audit skill coverage, trim documentation context, or avoid premature coding on feature, bugfix, refactor, migration, integration, testing, documentation, security, or architecture work.
 ---
 
 # Harness Wise
@@ -24,10 +24,11 @@ Do not add this skill itself to any generated or reviewed harness. The harness m
 3. Scan the repository lightly before reading large files.
 4. Curate source files, tests, documentation, and ignored context.
 5. Extract observable project patterns and architecture guardrails.
-6. Recommend relevant skills and identify missing skills.
-7. Estimate impact and risks.
-8. Ask one blocking question only when product or scope ambiguity would make the harness misleading.
-9. Emit the Coding Harness or Existing Harness Review.
+6. Surface task-relevant project intelligence when it materially improves the handoff: module maps, conventions, document maps, or reusable context gaps.
+7. Recommend relevant skills and identify missing skills.
+8. Estimate impact and risks.
+9. Ask one blocking question only when product or scope ambiguity would make the harness misleading.
+10. Emit the Coding Harness or Existing Harness Review.
 
 ## Execution Rules
 
@@ -36,6 +37,8 @@ Do not add this skill itself to any generated or reviewed harness. The harness m
 - If a technical fact is not verified, label it as an assumption or deferred verification item.
 - If product behavior, scope, or success criteria are unclear, ask one focused question before producing the final harness.
 - If the user provides an existing harness, switch to `harness-review` and evaluate it before generating a replacement.
+- Include project maps, convention summaries, or persistent artifact proposals only when they reduce risk or make repeated handoffs materially easier.
+- Do not write files such as `docs/project-map.md`, `docs/conventions.md`, or saved harness documents while using this skill. If the user explicitly asks for persistent artifacts, propose the paths and hand off to planning or work execution.
 
 ## Final Output
 
@@ -43,7 +46,7 @@ For new harnesses, load `references/harness-template.md` and fill only task-rele
 
 For classification-heavy work, load `references/task-classification.md`, `references/modes.md`, and `references/impact-estimation.md` before deciding scan depth.
 
-For documentation-heavy or uncertain repository work, load `references/context-curation.md`, `references/document-classification.md`, and `references/confidence-rubric.md` before finalizing context recommendations.
+For documentation-heavy, uncertain, or project-intelligence work, load `references/context-curation.md`, `references/document-classification.md`, and `references/confidence-rubric.md` before finalizing context recommendations.
 
 For skill-heavy work, load `references/skill-selection.md` and separate available, missing, review-only, and unverified recommendations.
 

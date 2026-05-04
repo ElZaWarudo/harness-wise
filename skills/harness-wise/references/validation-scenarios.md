@@ -29,6 +29,8 @@ Expected qualities:
 - Mode is `feature` or `deep` if multiple surfaces are detected.
 - Identifies contracts, models/services, UI/API entry points, tests, and docs.
 - Estimates impact across backend, frontend, API, tests, docs, and deployment.
+- Includes a compact task-relevant project or module map when several areas must coordinate.
+- Summarizes observed conventions the next agent should follow when they affect implementation.
 - Separates inspected evidence from assumptions and deferred verification.
 - Includes validation boundaries that match the touched surfaces.
 - Recommends relevant skills only when they reduce risk.
@@ -103,6 +105,7 @@ Expected qualities:
 - Produces a useful low-confidence harness.
 - Avoids inventing architecture.
 - Recommends first conventions/files to establish.
+- Proposes persistent project maps or conventions docs only as opt-in next steps.
 - Clearly separates assumptions from verified facts.
 
 ## Scenario 8: Shell Or Infrastructure Risk
@@ -117,3 +120,17 @@ Expected qualities:
 - States what the next agent may inspect or implement directly after summarizing intended changes versus what needs confirmation because it is destructive, affects external systems, or cannot be recovered with git.
 - Includes relevant validation and review steps for command behavior and failure handling.
 - Does not require a production sandbox, tracing system, or evaluation platform unless the repository task itself calls for one.
+
+## Scenario 9: Project Intelligence Request
+
+Prompt:
+
+> Use $harness-wise to map the project structure and conventions before adding billing reports.
+
+Expected qualities:
+
+- Produces task-relevant project intelligence, not a whole-repo inventory.
+- Summarizes relevant entry points, modules, tests, docs, and observed conventions.
+- Identifies reusable context gaps or optional persistent artifacts only when they would help repeated future work.
+- Frames `docs/project-map.md`, `docs/conventions.md`, or saved harness files as follow-up proposals for planning/work execution, not files created by the skill itself.
+- Does not add a new formal mode or recommend `$harness-wise` inside the generated harness.

@@ -19,10 +19,24 @@ Curate context before reading deeply. The goal is to give the next agent enough 
 
 When existing project documents are present and plausibly related, actively look for summarization opportunities. Do not emphasize summarization over code, tests, risks, or skills, but do not leave the `Summarize` bucket empty just because the documents are not worth reading in full.
 
+## Project Intelligence
+
+When broader project understanding would materially improve the handoff, include compact, task-relevant project intelligence. Keep it tied to the current task:
+
+- **Task-relevant project map** - The entry points, layers, modules, commands, or tests the next agent should understand for this task.
+- **Module map** - A focused relationship summary for a specific subsystem, not a whole-repo inventory.
+- **Convention summary** - Observed naming, structure, testing, error-handling, dependency, or review patterns the next agent should follow.
+- **Document map** - Which docs are current, stale, task-relevant, or useful only as historical background.
+- **Persistent artifact proposal** - A suggestion to create `docs/project-map.md`, `docs/conventions.md`, or a saved harness in a follow-up planning or work step when repeated future work would benefit.
+
+Do not generate persistent artifacts by default. If the user asks for a saved map, conventions document, or harness file, make the proposed path explicit, keep the proposed content grounded in inspected evidence, and hand off actual file writing to a planning or work flow.
+
 ## Anti-Bloat Rules
 
 - Do not ask the next agent to read directories without naming why.
 - Do not include entire docs because they are nearby; classify them first.
+- Do not add a whole-repo project map when a task-relevant map is enough.
+- Do not include convention summaries that are generic or unverified; tie each convention to observed files, tests, or docs.
 - For relevant long, broad, or partially stale docs, prefer a task-specific summary over raw inclusion or silent omission.
 - Prefer symbols, interfaces, tests, and examples over unrelated implementation bodies.
 - If there are many similar files, pick representative examples and say why.
