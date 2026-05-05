@@ -56,39 +56,48 @@ Use $compound-master mode:resume jira-policy:optional parallel:false
 
 ## Install
 
-Install a skill from KRT:
+Install one skill:
 
 ```bash
-npx -y skills add ElZaWarudo/krt --skill harness-wise
-npx -y skills add ElZaWarudo/krt --skill compound-master
-npx -y skills add ElZaWarudo/krt --skill release-marshal
-npx -y skills add ElZaWarudo/krt --skill gitflow-knight
-npx -y skills add ElZaWarudo/krt --skill rebase-smith
-npx -y skills add ElZaWarudo/krt --skill jira-scribe
+npx -y skills add ElZaWarudo/krt --skill <skill-name>
 ```
 
-Target a specific runtime:
+Install the whole table:
 
 ```bash
-npx -y skills add ElZaWarudo/krt --skill harness-wise -a codex
-npx -y skills add ElZaWarudo/krt --skill compound-master -a codex
+npx -y skills add ElZaWarudo/krt --all
 ```
+
+Install the release court:
+
+```bash
+npx -y skills add ElZaWarudo/krt \
+  --skill release-marshal \
+  --skill gitflow-knight \
+  --skill rebase-smith \
+  --skill jira-scribe
+```
+
+`release-marshal` expects those three companions to be available. The skills CLI supports repeated `--skill` flags and `--all`; KRT does not currently rely on automatic dependency resolution in skill frontmatter. The Mariscal can read the room, but he still needs the room installed.
+
+Target a specific runtime when needed:
+
+```bash
+npx -y skills add ElZaWarudo/krt --skill <skill-name> -a <agent>
+```
+
+Use `-a <agent>` when you want the skill wired into a particular agent instead of trusting autodetection. Some agents read `.agents/skills/` directly; others need the CLI to place a symlink or copy in their own directory. Name the knight you expect to answer.
 
 Update installed skills:
 
 ```bash
-npx skills update harness-wise
-npx skills update compound-master
-npx skills update release-marshal
-npx skills update gitflow-knight
-npx skills update rebase-smith
-npx skills update jira-scribe
+npx skills update
 ```
 
 If `npx` wanders into the forest:
 
 ```bash
-npm exec --yes --package skills -- skills update harness-wise
+npm exec --yes --package skills -- skills update
 ```
 
 ## Components
