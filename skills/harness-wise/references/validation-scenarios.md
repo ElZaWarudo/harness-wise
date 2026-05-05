@@ -4,6 +4,8 @@ Use these scenarios when changing the skill. The goal is to test whether the ski
 
 Across all scenarios, the skill should stay a helper for coding harnesses. It should not introduce an `agentic-system` mode, runtime architecture checklists, tracing stacks, sandbox platforms, evaluation platforms, or self-recommendations for `$krt:harness-wise` unless the user explicitly asks for those topics.
 
+When changing the harness structure itself, expected qualities should be justified against `harness-structure-research.md` rather than personal preference alone.
+
 ## Scenario 1: Small Bugfix
 
 Prompt:
@@ -34,6 +36,7 @@ Expected qualities:
 - Separates inspected evidence from assumptions and deferred verification.
 - Includes validation boundaries that match the touched surfaces.
 - Recommends relevant skills only when they reduce risk.
+- Proposes saving the harness to a concrete path if the repo scan suggests the feature spans enough surfaces to benefit from a persistent handoff, but does not write the file unless asked.
 
 ## Scenario 3: Docs Trim
 
@@ -131,6 +134,60 @@ Expected qualities:
 
 - Produces task-relevant project intelligence, not a whole-repo inventory.
 - Summarizes relevant entry points, modules, tests, docs, and observed conventions.
-- Identifies reusable context gaps or optional persistent artifacts only when they would help repeated future work.
-- Frames `docs/project-map.md`, `docs/conventions.md`, or saved harness files as follow-up proposals for planning/work execution, not files created by the skill itself.
+- Identifies reusable context gaps or optional persistent project artifacts only when they would help repeated future work.
+- Frames `docs/project-map.md` and `docs/conventions.md` as follow-up proposals for planning/work execution, not files created by the skill itself.
 - Does not add a new formal mode or recommend `$krt:harness-wise` inside the generated harness.
+
+## Scenario 10: Saved Harness File
+
+Prompt:
+
+> Use $krt:harness-wise and generate a harness file for adding invoice CSV export.
+
+Expected qualities:
+
+- Creates a markdown harness file rather than only returning the harness in chat.
+- Uses an existing harness directory if present, otherwise defaults to `docs/harnesses/invoice-csv-export.md`.
+- Includes the required `type: coding-harness` frontmatter with task, status, scope, confidence, created, and updated.
+- Uses the Coding Harness Template with required saved-file sections.
+- Does not create application source files, tests, migrations, configs, or general project docs.
+- Reports the created file path and any blocking questions or deferred verification.
+
+## Scenario 11: Ambiguous Generated Files
+
+Prompt:
+
+> Use $krt:harness-wise to generate the files for the billing refactor.
+
+Expected qualities:
+
+- Interprets "files" as harness artifacts because the request is in a harness-wise context, unless the user clearly asks for application code.
+- Creates one compact harness file for the billing refactor, or asks one blocking question if the refactor scope is too vague to create a useful harness.
+- Does not start implementing billing refactor code.
+- Keeps project intelligence task-relevant and avoids whole-repo project maps unless needed for the handoff.
+
+## Scenario 12: Proactive Saved Harness Proposal
+
+Prompt:
+
+> Use $krt:harness-wise before modernizing the billing architecture.
+
+Expected qualities:
+
+- Produces a response-only harness unless the user asks to save it.
+- Proposes a saved harness path such as `docs/harnesses/billing-architecture-modernization.md` because the work is architectural and likely to span sessions or handoffs.
+- Explains in one sentence why persistence helps.
+- Does not write the harness file without user confirmation.
+- Does not propose project maps or convention docs as already-created files.
+
+## Scenario 13: No Saved Harness Proposal For Tiny Work
+
+Prompt:
+
+> Use $krt:harness-wise before renaming one private helper method.
+
+Expected qualities:
+
+- Produces a compact quick-mode harness.
+- Does not propose a saved harness file unless the repo scan shows unusual risk, repeated handoffs, or broad impact.
+- Keeps context and validation proportional to the tiny local change.

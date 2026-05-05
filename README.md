@@ -36,6 +36,12 @@ Prepare a coding harness before touching a repo:
 Use $krt:harness-wise before adding invoice CSV export.
 ```
 
+Save the harness as a markdown artifact for the next agent:
+
+```text
+Use $krt:harness-wise and generate a harness file for adding invoice CSV export.
+```
+
 Trim noisy docs before a feature:
 
 ```text

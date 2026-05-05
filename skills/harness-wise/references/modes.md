@@ -20,6 +20,16 @@ Infer a mode when the user does not specify one. Prefer the smallest mode that c
 - Use task-specific modes when the user's wording is explicit: "bug", "feature", "refactor", "audit skills", "review this harness", "trim docs".
 - If a harness file or pasted harness is present, use **harness-review** unless the user explicitly asks to regenerate from scratch.
 
+Modes classify the task and scan depth; they do not decide whether output is written to disk. Separately choose an output target:
+
+- **response-only** - Default when the user asks for a harness without asking to save or generate files.
+- **saved harness file** - Use when the user asks to create, write, save, generate, persist, or update a harness artifact.
+- **existing harness update** - Use when the user asks to patch or refresh a specific harness file.
+
+In harness-wise context, ambiguous "generate files" wording means harness markdown artifacts, not application code, unless the user clearly asks for source files.
+
+Even in `response-only`, propose a saved harness file when persistence would add value. The proposal is not a write target until the user asks or confirms.
+
 ## Mode Output Differences
 
 | Mode | Keep Compact | Add Depth |
