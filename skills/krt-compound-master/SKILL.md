@@ -60,7 +60,8 @@ Core pipeline:
 - Keep planning IDs out of human-facing release text. `RDM-001`, `U1`, date sequences, and package numbers may appear in metadata, paths, dependency tables, and state, but not in suggested Jira summaries/descriptions, commit messages, PR titles, PR body bullets, or branch names unless the user or repo convention explicitly requires them.
 - Do not let the work phase invoke its own PR/shipping flow. Shipping is delegated to `krt-release-marshal`.
 - Do not open PRs from protected branches: `main`, `master`, or `develop`.
-- Do not transition Jira outside an approved release plan. `krt-jira-scribe` must fetch real transitions and require confirmation before `En Revisión` or any other state; an accepted `krt-release-marshal` plan may count as confirmation for automatic post-PR transition to `En Revisión` when it names the issue and target status.
+- Do not transition Jira outside an approved release plan. `krt-jira-scribe` must fetch real transitions and require confirmation before `En Revisión` or any other state; an accepted `krt-release-marshal` plan may count as confirmation for automatic post-PR transition to `En Revisión` when it names the issue, target status, and fallback behavior.
+- Treat verification results as release-readiness evidence, not public PR copy. Do not put test commands, test output, or verification summaries in suggested PR body bullets unless the user, repo template, or project convention explicitly requires it.
 - Never ask for Jira credentials. Missing Jira env vars are a configuration blocker or a user-approved no-Jira exception, depending on `jira-policy`.
 
 ## Stop Discipline
@@ -221,7 +222,7 @@ Invoke the resolved `code_review` role normally. Prefer autofix when safe; retry
 
 ### Step 9 - Release Marshal Handoff
 
-When implementation and review gates pass, invoke `krt-release-marshal`. Do not stop after saying it is the next step. Include work package path, roadmap item, origin plan, current branch, intended base, Jira policy, suggested Jira summary/description, PR title/body bullets, verification results, and instruction to include automatic post-PR Jira transition to `En Revisión` when Jira context exists.
+When implementation and review gates pass, invoke `krt-release-marshal`. Do not stop after saying it is the next step. Include work package path, roadmap item, origin plan, current branch, intended base, Jira policy, suggested Jira summary/description, PR title/body bullets, verification results as internal release-readiness context, and instruction to include automatic reviewer handling and automatic post-PR Jira transition to `En Revisión` in the release plan when Jira context exists.
 
 ### Step 10 - Continue Waves Or Finish
 

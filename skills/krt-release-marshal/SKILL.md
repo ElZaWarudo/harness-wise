@@ -12,7 +12,7 @@ The marshal directs component skills instead of duplicating them:
 - `krt-gitflow-knight` (`krt:gitflow-knight`) owns branch hygiene, staging, and commit planning.
 - `krt-rebase-smith` (`krt:rebase-smith`) owns clean branch history and safe rebase decisions.
 - `krt-jira-scribe` (`krt:jira-scribe`) owns Jira issue/subtask lookup, creation proposals, sprint handling, and transitions.
-- `gh` owns GitHub remote state, push/PR operations, and reviewer requests after confirmation.
+- `gh` owns GitHub remote state, push/PR operations, and reviewer requests after release-plan confirmation.
 
 Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body details, base resolution, remote branch checks, and reviewer lookup.
 
@@ -25,6 +25,7 @@ Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body detai
 - Never include LLM attribution in PR title/body or commit messages.
 - Never include Compound Master planning IDs or package numbers in PR titles, PR body bullets, branch names, or commit messages unless the user or repo convention explicitly requires them.
 - Never include secrets, tokens, credentials, or internal environment dumps in the PR body.
+- Treat verification results from upstream workflows as readiness evidence only. Do not include test commands, test output, or verification summaries in the PR body unless the user, repo template, or project convention explicitly requires it.
 - Do not run tests, linters, or formatters unless the user explicitly asks; use verification results supplied by the user or upstream workflow.
 - Do not ask for Jira credentials. If required Jira env vars are missing, continue without Jira only if the user approves.
 - Use `--force-with-lease`, never plain `--force`, when a rewritten branch must be pushed.
@@ -43,7 +44,7 @@ Ask before destructive, irreversible, external, or notification-causing work unl
 - Reviewer requests.
 - Remote branch rewrites.
 
-One explicit release-plan approval may cover automatic post-PR Jira transition to `En Revisión` if the plan names the issue, target status, and fallback behavior.
+One explicit release-plan approval may cover reviewer requests and automatic post-PR Jira transition to `En Revisión` if the plan names the behavior and fallback. For Jira transition, the plan must name the issue and target status. For reviewer requests, the plan may name explicit reviewers or authorize automatic lookup and request of a clear inferred human reviewer.
 
 ## Inputs
 
@@ -55,7 +56,7 @@ Use context already provided by the user or previous skills:
 - PR title/body preference.
 - Draft vs ready preference.
 - Explicit reviewers, or "sin reviewers" / "no reviewers".
-- Verification results.
+- Verification results as internal readiness context only.
 
 If the user asks simply to create a PR and there are uncommitted changes or no Jira context, propose the full flow and ask before creating Jira artifacts.
 
@@ -71,7 +72,7 @@ Build and show a phase plan:
 - Rebase phase: recommended before PR unless the user explicitly skips.
 - Jira phase: needed if the user wants a Jira link or the project requires it.
 - PR phase: always included.
-- Reviewer phase: propose reviewers after PR creation unless skipped.
+- Reviewer phase: after PR creation, request explicit reviewers or infer one clear reviewer when the accepted plan includes automatic reviewer handling; otherwise ask or skip according to user preference.
 - Jira transition phase: after PR creation, move the associated Jira task to `En Revisión` when Jira context exists and the accepted plan included that transition; otherwise ask.
 
 When commit work is needed, include proposed branch and commit grouping when practical. If grouping needs more inspection, make that the next local step inside the same acceptance gate rather than adding another branch/commit confirmation.
@@ -108,7 +109,7 @@ Before push or PR creation/update, show:
 - Draft or ready status.
 - Jira links included.
 - Jira transition plan: issue key, current status if known, target `En Revisión`, and whether it will run automatically after PR creation.
-- Reviewer plan: explicit reviewers, inferred reviewers to propose after PR creation, or skipped.
+- Reviewer plan: explicit reviewers, automatic inferred reviewer lookup/request, or skipped.
 
 Ask for approval before the next remote mutation.
 
@@ -122,9 +123,11 @@ If an open PR already exists for the branch, stop and ask whether to view/update
 
 If the user explicitly requested no reviewers, skip.
 
-If the user provided reviewers, show them and ask before adding them because this notifies people.
+If the accepted release plan already included the exact reviewer request behavior, do not ask again.
 
-If no reviewers were provided, infer candidates from recent merged PR approvals against the same base. Exclude bots, duplicates, and the author/current GitHub user. If no clear reviewers remain, say so and skip assignment. Ask before adding inferred reviewers.
+If the user provided reviewers and the accepted plan did not already approve reviewer requests, show them and ask before adding them because this notifies people.
+
+If no reviewers were provided, infer candidates from recent merged PR approvals against the same base. Exclude bots, duplicates, and the author/current GitHub user. If no clear reviewers remain, say so and skip assignment. If the accepted plan included automatic inferred reviewer lookup/request, add the single clear reviewer without asking a second time; otherwise ask before adding inferred reviewers.
 
 ### 8. Closeout And Jira Review Transition
 

@@ -104,6 +104,7 @@ Rules:
 - Do not distinguish parent vs subtask unless the user asks.
 - Omit Jira URL if Jira context is missing.
 - Include verification only if the user asks, the repo requires it, or the PR template requires it.
+- Treat upstream test results as readiness context, not body content.
 - Keep the body factual.
 
 ## Create PR
@@ -136,7 +137,7 @@ gh pr list --base <base> --state merged --limit 3 --json number,title,author,rev
 
 Prefer users who approved the most recent merged PR. If that PR has no useful approvals, inspect up to three merged PRs and choose frequent human approvers. Exclude bots, duplicates, and the author/current GitHub user.
 
-Add reviewers only after confirmation:
+Add reviewers after confirmation, or without a second prompt when the accepted release plan approved automatic reviewer lookup/request and exactly one clear human reviewer was inferred:
 
 ```bash
 gh pr edit <number> --add-reviewer user-a,user-b
