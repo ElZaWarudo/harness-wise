@@ -5,7 +5,7 @@ description: Manages Jira Server/Data Center issues on a Spanish-language instan
 
 # Jira Scribe
 
-This skill automates issue management in Jira Server/Data Center, verifying the existence of global issues and subtasks, and proposing their creation if they don't exist.
+This skill automates issue management in Jira Server/Data Center, verifying the existence of global issues and subtasks, checking whether new work belongs under an existing parent issue, and proposing creation only when the right Jira shape is clear.
 
 Since it works against a shared external system, it must never create issues, subtasks, or transition states without explicit user confirmation.
 
@@ -193,7 +193,17 @@ if [[ -z "$JIRA_API_TOKEN" || -z "$JIRA_HOST" || -z "$JIRA_PROJECT_KEY" ]]; then
 fi
 ```
 
-### 2. Verify/Create Global Issue
+### 2. Resolve issue shape before creating anything
+
+Before proposing a new global issue, decide whether the requested work should instead be a subtask under an existing issue.
+
+1. **Search for possible parents first**: Use project, type, and meaningful summary/context terms to find existing parent issues that could own the work.
+2. **Inspect plausible parents**: For strong candidates, get the issue by key and review summary, status, description, and existing subtasks.
+3. **Prefer reuse when scope fits**: If an open parent issue clearly covers the requested work, propose creating or reusing a subtask under that parent instead of creating a standalone `Tarea`.
+4. **Ask when ambiguous**: If multiple parents could fit, show the candidates and ask the user which parent to use, or whether the work deserves a new global issue.
+5. **Create a global issue only after ruling out parent fit**: Do not propose a new standalone task just because no exact summary match exists.
+
+### 3. Verify/Create Global Issue
 
 1. **Search for candidates**: JQL with project, type, and `summary ~ "text"`.
 2. **Show candidates**: list key, status, summary, and URL.
@@ -211,7 +221,7 @@ For new global issues/parent tasks:
 
 Do not automatically create issues based solely on a fuzzy search by `summary ~`.
 
-### 3. Verify/Create Subtask
+### 4. Verify/Create Subtask
 
 1. **Search for candidates**: JQL with `parent = "PARENT_KEY" AND summary ~ "text"`.
 2. **Show candidates**: list key, status, summary, and URL.
@@ -227,7 +237,7 @@ When the user provides a parent key (e.g. `PDP-32`):
 4. Propose reusing an open subtask if there's a clear match, or creating a new one if the scope doesn't fit.
 5. Create a new subtask only with explicit user confirmation.
 
-### 4. Confirm Final Status
+### 5. Confirm Final Status
 
 When completing work:
 1. Show summary (issue + subtask)
