@@ -7,7 +7,7 @@ description: Manages Jira Server/Data Center issues on a Spanish-language instan
 
 This skill automates issue management in Jira Server/Data Center, verifying the existence of global issues and subtasks, checking whether new work belongs under an existing parent issue, and proposing creation only when the right Jira shape is clear.
 
-Since it works against a shared external system, it must never create issues, subtasks, or transition states without explicit user confirmation.
+Since it works against a shared external system, it must never create issues, subtasks, or transition states without explicit user confirmation. Confirmation may come from the current Jira prompt or from an accepted `krt:release-marshal` plan that explicitly names the issue, target status, and automatic post-PR transition behavior.
 
 ## Language: Spanish Jira Instance
 
@@ -246,10 +246,17 @@ When completing work:
 4. Ask whether to move to "En Revisión", "Terminado", or another available transition
 5. Execute transition only if confirmed
 
-After creating or updating an associated PR, offer to move the Jira task to review:
+After creating or updating an associated PR without a pre-approved release-marshal transition, offer to move the Jira task to review:
 1. Get the actual transitions for the issue/subtask.
 2. If a transition named "En Revisión" exists, propose it with its ID and target status.
 3. Execute only with explicit confirmation.
+
+If called by `krt:release-marshal` after PR creation and the accepted release plan already approved automatic transition to `En Revisión`:
+1. Get the actual transitions for the issue/subtask.
+2. Require an exact available transition named "En Revisión".
+3. Execute that transition without asking a second time.
+4. Report the issue key, previous status, transition ID/name, and resulting status.
+5. If the exact transition is unavailable or the issue key is ambiguous, stop and ask instead of guessing.
 
 ## Required confirmations
 
@@ -270,7 +277,7 @@ Before transitioning an issue, show:
 - Target transition
 - Transition ID
 
-Do not execute remote changes until the user confirms.
+Do not execute remote changes until the user confirms. For release-marshal initiated post-PR transitions, the accepted release plan counts as confirmation only when it explicitly approved automatic transition of the named Jira issue to `En Revisión`.
 
 ## HTTP error handling
 

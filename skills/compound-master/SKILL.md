@@ -51,7 +51,7 @@ Core pipeline:
 - A PR unit is a **work package**, not every bullet in a plan. Avoid PR-per-microtask.
 - Do not let the work phase invoke its own PR/shipping flow in this orchestration. Shipping is delegated to `krt:release-marshal`.
 - Do not open PRs from protected branches: `main`, `master`, or `develop`.
-- Do not transition Jira automatically. `krt:jira-scribe` must fetch real transitions and require confirmation before `En Revisión` or any other state.
+- Do not transition Jira outside an approved release plan. `krt:jira-scribe` must fetch real transitions and require confirmation before `En Revisión` or any other state; an accepted `krt:release-marshal` plan may count as confirmation for automatic post-PR transition to `En Revisión` when it names the issue and target status.
 - Never ask for Jira credentials. Missing Jira env vars are a configuration blocker or a user-approved no-Jira exception, depending on `jira-policy`.
 
 ## Proactive stop discipline
@@ -72,6 +72,8 @@ If the next step is obvious and safe, do it instead of stopping. Recommend one d
 The lead agent owns orchestration continuity. Delegating implementation does not delegate responsibility for the rest of the flow. When a worker returns, the lead must integrate the result, run or attempt the local verification gate, then continue to review and release handoff when gates pass.
 
 Do not stop merely because local stack startup, test execution, linting, or review remains. Those are normal lead-agent follow-through tasks after implementation. Stop only when verification requires missing credentials, destructive setup, external paid resources, unclear environment choices, or a product/technical decision the agent cannot infer.
+
+Do not stop between a passing `work`/verification/review loop and the start of `krt:release-marshal`. Starting the release marshal is not itself shipping; it is the next orchestration step that prepares and presents the release plan. The user-facing pause belongs inside `krt:release-marshal` when it shows its workflow/PR/Jira plan and asks for the approvals it owns.
 
 ## Runtime adapter guidance
 
@@ -567,15 +569,17 @@ Loop:
 5. Log P3/advisory findings unless the user marks them blocking.
 6. Stop after three rounds if blockers remain. Do not open PR unless the user explicitly accepts residual risk.
 
-Passing gate: no actionable finding at or above the configured `review-threshold`, no unresolved security/data/contract finding, tests pass, advisory findings recorded.
+Passing gate: no actionable finding at or above the configured `review-threshold`, no unresolved security/data/contract finding, tests pass or documented verification gap is acceptable under the package risk, advisory findings recorded.
 
-If review passes, proceed to Step 9 without asking unless shipping would mutate external systems before `krt:release-marshal` can present its own approval gate.
+If review passes, proceed to Step 9 without asking. Do not insert a Compound Master approval gate here. Let `krt:release-marshal` present its own plan and approval gates before any push, PR, Jira mutation, reviewer request, or transition.
 
 If review blockers remain after three loops, stop with a review-blocked closeout that includes the latest findings path, unresolved findings grouped by severity, verification status, and the exact recommended resolver invocation.
 
 ## Step 9 — Handoff to krt:release-marshal
 
 When implementation and review gates pass, invoke `krt:release-marshal`. Do not duplicate its internal procedures.
+
+This handoff is mandatory continuity, not an optional recommendation. Do not stop after saying "next step: krt:release-marshal" when the `project_pr` role is resolved and no shipping blocker is already known. Invoke it so the marshal can produce its release plan and request the approvals it owns.
 
 `krt:release-marshal` owns:
 
@@ -585,12 +589,12 @@ When implementation and review gates pass, invoke `krt:release-marshal`. Do not 
 - PR body/title construction;
 - push and PR creation via `gh`;
 - reviewer proposal/request with confirmation;
-- Jira transition offer after PR creation.
+- Jira transition to review after PR creation when included in the accepted release plan.
 
 Invocation shape:
 
 ```text
-Skill("<project_pr>", "Run the full krt:release-marshal workflow for this completed work package.\n\nWork package: <work-package-path>\nRoadmap item: RDM-###\nOrigin plan: <origin-plan-path>\nCurrent branch: <branch-name>\nIntended base: <base-branch>\nJira policy: <required|optional|skip>\nSuggested Jira summary: <summary>\nSuggested Jira description: <description>\nSuggested PR title: <title>\nSuggested PR body bullets:\n- <change>\n- <change>\nVerification results:\n- <command/result>\n\nUse krt:release-marshal exactly. Do not run tests unless the user explicitly asks; use the verification results above. Ask before external mutations or notifications according to krt:release-marshal. After PR creation, offer Jira transition to En Revisión using krt:jira-scribe and the real transition list.")
+Skill("<project_pr>", "Run the full krt:release-marshal workflow for this completed work package.\n\nWork package: <work-package-path>\nRoadmap item: RDM-###\nOrigin plan: <origin-plan-path>\nCurrent branch: <branch-name>\nIntended base: <base-branch>\nJira policy: <required|optional|skip>\nSuggested Jira summary: <summary>\nSuggested Jira description: <description>\nSuggested PR title: <title>\nSuggested PR body bullets:\n- <change>\n- <change>\nVerification results:\n- <command/result>\n\nUse krt:release-marshal exactly. Do not run tests unless the user explicitly asks; use the verification results above. Ask before external mutations or notifications according to krt:release-marshal. Include automatic post-PR Jira transition to En Revisión in the release plan when Jira context exists; after PR creation, use krt:jira-scribe and the real transition list to perform that approved transition without asking a second time.")
 ```
 
 PR tree safety:

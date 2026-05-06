@@ -13,7 +13,7 @@ Orchestrate the full delivery flow for the current project. Calling this skill i
 2. Rebase safely onto `develop` or the selected base branch.
 3. Create or reuse Jira Server/Data Center issue and subtask.
 4. Create a GitHub pull request with a factual body and Jira link.
-5. Offer to move the associated Jira task to review after the PR is created.
+5. Move the associated Jira task to review after the PR is created when that transition was approved in the release plan.
 
 The marshal directs specialized skills instead of duplicating their detailed workflows:
 
@@ -28,7 +28,7 @@ The marshal directs specialized skills instead of duplicating their detailed wor
 - Use `gh` for GitHub PR operations.
 - Never create a PR from protected branches: `main`, `master`, `develop`.
 - Never assume the base branch. Prefer `develop` if it exists, otherwise use the repository default branch.
-- Only require user approval for destructive/irreversible actions or mutating/notification-causing external-system actions: push, force-with-lease push, PR creation/update, reviewer requests, Jira issue creation/update/transition, or remote branch rewrites.
+- Only require user approval for destructive/irreversible actions or mutating/notification-causing external-system actions: push, force-with-lease push, PR creation/update, reviewer requests, Jira issue creation/update/transition, or remote branch rewrites. One explicit release-plan approval may cover the later Jira transition to `En Revisión` if the plan names the issue, target status, and fallback behavior.
 - Never include LLM attribution in the PR title or body.
 - Never include secrets, tokens, credentials, or internal environment dumps in the PR body.
 - Do not run tests, linters, or formatters unless the user explicitly asks.
@@ -36,7 +36,7 @@ The marshal directs specialized skills instead of duplicating their detailed wor
 - Use `--force-with-lease`, never plain `--force`, if a rewritten branch must be pushed.
 - Prefer concise PR bodies by default: change bullets first, Jira URL last, no section headings unless the user asks for them or the repo requires a template.
 - Do not ask approval for local, reversible work when intent is clear: branch creation/switching, staging, local commits, local rebases on unpushed branches, reading repo/GitHub/Jira state, and preparing PR text. Ask only when required information is missing or the action crosses the approval policy above.
-- The workflow should have one initial plan acceptance gate. After the user accepts that plan, proceed through local/reversible phases without asking again. Add extra approval gates only for destructive/irreversible work or external mutations/notifications.
+- The workflow should have one initial plan acceptance gate. After the user accepts that plan, proceed through local/reversible phases without asking again. Add extra approval gates only for destructive/irreversible work or external mutations/notifications not already covered by the accepted plan.
 
 ## Component skills
 
@@ -84,11 +84,11 @@ Build and show a plan with the phases that apply:
 - Jira phase: needed if the user wants a Jira link or the project requires it.
 - PR phase: always included.
 - Reviewer phase: propose reviewers after PR creation unless skipped.
-- Jira transition phase: offer after PR creation when Jira context exists.
+- Jira transition phase: after PR creation, move the associated Jira task to `En Revisión` when Jira context exists and the accepted plan included that transition; otherwise ask.
 
 When commit work is needed, include the proposed branch and commit grouping in this plan whenever practical. If the grouping requires more inspection, say that the next local step is to produce the commit plan, and treat that commit plan as the same acceptance gate rather than adding separate branch/commit confirmations.
 
-Ask the user to accept the phase plan before changing local state. This is the main workflow gate. Once accepted, do not ask again for local/reversible actions such as branch creation, staging, local commits, or local rebase. Still ask before later external mutations such as Jira creation, push, PR creation, reviewer requests, or Jira transitions.
+Ask the user to accept the phase plan before changing local state. This is the main workflow gate. Once accepted, do not ask again for local/reversible actions such as branch creation, staging, local commits, or local rebase. Still ask before later external mutations such as Jira creation, push, PR creation, reviewer requests, or Jira transitions unless that exact mutation is explicitly included in the accepted plan.
 
 ### 2) Commit phase
 
@@ -234,6 +234,7 @@ Before pushing or creating/updating the PR, show:
 - PR body
 - Draft or ready status
 - Jira links included
+- Jira transition plan: issue key, current status if known, target `En Revisión`, and whether it will run automatically after PR creation
 - Reviewer plan: explicit reviewers, inferred reviewers to propose after PR creation, or skipped
 
 Ask the user to approve.
@@ -314,7 +315,7 @@ Return:
 - Jira link if included
 - Whether it is draft or ready
 
-After returning the PR, if Jira context was included, ask whether to move the associated Jira issue to review. Use `krt:jira-scribe` to inspect real transitions and execute only after confirmation.
+After returning the PR, if Jira context was included and the approved plan included the review transition, use `krt:jira-scribe` to inspect real transitions and move the associated Jira issue to `En Revisión` without asking again. If `En Revisión` is unavailable, if the issue key is ambiguous, or if the approved plan did not include automatic transition, ask before transitioning.
 
 ## PR-only mode
 
