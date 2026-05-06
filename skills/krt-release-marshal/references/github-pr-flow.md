@@ -76,7 +76,7 @@ If an open PR exists for the branch, stop and ask whether to view/update it inst
 
 ## PR Title
 
-Prefer a concise title derived from branch and commits. Use sentence case or Conventional Commit style depending on repo convention. Do not include Jira key unless the repo already does. Avoid vague titles like `updates`, `fix stuff`, or `changes`.
+Prefer a concise title derived from branch and commits. Use sentence case or Conventional Commit style depending on repo convention. Do not include Jira key unless the repo already does. Do not include Compound Master IDs, package numbers, or date sequences unless the user or repo convention explicitly requires them. Avoid vague titles like `updates`, `fix stuff`, or `changes`.
 
 Examples:
 

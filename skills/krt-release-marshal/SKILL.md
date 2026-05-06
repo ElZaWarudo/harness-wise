@@ -23,6 +23,7 @@ Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body detai
 - Never create a PR from protected branches: `main`, `master`, or `develop`.
 - Prefer `develop` as PR base when it exists; otherwise use the repository default branch unless the user or enclosing workflow provided a base.
 - Never include LLM attribution in PR title/body or commit messages.
+- Never include Compound Master planning IDs or package numbers in PR titles, PR body bullets, branch names, or commit messages unless the user or repo convention explicitly requires them.
 - Never include secrets, tokens, credentials, or internal environment dumps in the PR body.
 - Do not run tests, linters, or formatters unless the user explicitly asks; use verification results supplied by the user or upstream workflow.
 - Do not ask for Jira credentials. If required Jira env vars are missing, continue without Jira only if the user approves.

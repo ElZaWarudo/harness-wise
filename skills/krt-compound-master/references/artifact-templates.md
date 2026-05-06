@@ -120,7 +120,7 @@ jira_policy: [required|optional|skip]
 - Findings below threshold: log unless user marks blocking
 
 ## Branch and PR Handoff Inputs
-- Branch name: [feat/rdm-001-slug]
+- Branch name: [feat/package-slug-without-plan-number]
 - PR base: [develop/main/parent branch]
 - PR title:
 - PR body bullets:
@@ -130,11 +130,22 @@ jira_policy: [required|optional|skip]
 - Jira policy: [required|optional|skip]
 - Suggested issue type: Tarea
 - Suggested subtask behavior: create/reuse subtask when parent is provided
-- Jira summary:
-- Jira description:
+- Jira summary: [semantic title without roadmap/package numbers]
+- Jira description: [concise scope/reason without roadmap/package numbers]
 ```
 
 Review every package with `document_review`. Fix blockers before execution.
+
+## Human-Facing Handoff Text
+
+Keep internal planning identifiers out of public/reviewer-facing text:
+
+- Do not include `RDM-001`, `U1`, date sequences, package numbers, or work-package sequence numbers in Jira summaries/descriptions, commit messages, PR titles, PR body bullets, or branch names.
+- Use semantic names that describe the capability or fix: `feat/tenant-permission-bundles`, not `feat/rdm-001-tenant-permission-bundles`.
+- Jira summaries should read like work items a teammate would understand without the orchestration plan.
+- Jira descriptions should explain scope and reason in concise prose, not restate roadmap IDs or package numbers.
+- PR titles and commit messages should be value-oriented and conventional; put traceability in artifact metadata, PR dependency notes, or Jira links instead of the title.
+- Keep IDs only in internal fields such as `roadmap_item`, `units`, origin paths, dependency tables, and state.
 
 ## Artifact Closeout
 

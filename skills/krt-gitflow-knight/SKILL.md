@@ -92,6 +92,7 @@ Rules:
 - Avoid a trailing period.
 - Keep the summary under ~72 characters when practical.
 - Describe user-visible or maintenance value, not implementation mechanics.
+- Do not include orchestration IDs such as `RDM-001`, `U1`, package numbers, or date sequences unless the user or repo convention explicitly requires them.
 
 Examples:
 

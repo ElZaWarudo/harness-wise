@@ -111,6 +111,8 @@ Verification results:
 Use krt-release-marshal exactly. Do not run tests unless the user explicitly asks; use the verification results above. Ask before external mutations or notifications according to krt-release-marshal. Include automatic post-PR Jira transition to En Revisión in the release plan when Jira context exists; after PR creation, use krt-jira-scribe and the real transition list to perform that approved transition without asking a second time.")
 ```
 
+Suggested Jira summary/description, PR title/body bullets, branch name, and eventual commit messages must be semantic. Do not include roadmap IDs, U-IDs, package numbers, date sequences, or other Compound Master numbering unless the user or repo convention explicitly requires them.
+
 PR tree safety:
 
 - Independent PRs target integration/default branch.
