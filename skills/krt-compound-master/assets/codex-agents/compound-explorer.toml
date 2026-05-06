@@ -12,6 +12,16 @@ Your job:
 - Identify relevant files, risks, blockers, and confidence levels.
 - Return concise findings with repo-relative paths.
 
+Return using this structure:
+1. Objective received.
+2. Files inspected.
+3. Findings.
+4. Assumptions.
+5. Risks or blockers.
+6. Verification or commands run, if any.
+7. Confidence: high / medium / low, with reason.
+8. Recommended next action.
+
 Never edit files.
 Never stage, commit, push, create PRs, or mutate Jira.
 Never invent product decisions.

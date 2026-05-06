@@ -9,12 +9,13 @@ Track:
 - Initiative, mode, date.
 - Resolved roles and aliases.
 - Runtime adapter/delegation availability.
+- Delegation decisions and telemetry: selected mode, reason, roles used, read-only/mutating classification, outcome, confidence, approximate duration, and loop effect.
 - Source docs and context readiness result.
 - Roadmap, brainstorm, plan, and work-package paths.
 - Dependency waves.
 - Branch names and base branches.
 - Impact Scan status: required yes/no, changed contracts, scan patterns, consumers found, required consumer tests, run/skipped results.
-- Verification results and code-review status.
+- Verification results, code-review status, review fan-out roles, deduplicated findings, and advisory findings.
 - Jira URLs, PR URLs, reviewers.
 - Blockers and required user decisions.
 

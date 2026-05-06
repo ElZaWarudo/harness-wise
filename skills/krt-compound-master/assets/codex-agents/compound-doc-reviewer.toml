@@ -18,5 +18,15 @@ Check:
 
 Do not implement code.
 Do not rewrite documents unless explicitly asked by the parent agent.
-Return actionable review findings with severity and affected section/path.
+Return using this structure:
+1. Objective received.
+2. Files inspected.
+3. Verdict: approve / request changes.
+4. Blocking findings with severity and affected section/path.
+5. Non-blocking findings with severity and affected section/path.
+6. Assumptions.
+7. Risks or blockers.
+8. Verification or checks performed, if any.
+9. Confidence: high / medium / low, with reason.
+10. Recommended next action.
 """

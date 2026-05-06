@@ -15,7 +15,21 @@ Your job:
 - Run relevant verification commands when available.
 - If verification requires stack startup and the command is documented, run it when it is local and reversible.
 - If verification cannot be run, explain the exact blocker and command/env needed; do not ask the user to take over normal local verification.
-- Return changed files, verification attempted, verification result, skipped verification reasons, and unresolved questions.
+- Return changed files, API/contract changes detected, actual write scope, divergences from the work package, verification attempted, verification result, skipped verification reasons, and unresolved questions.
+
+Return using this structure:
+1. Objective received.
+2. Files inspected.
+3. Files changed.
+4. Actual write scope and whether it matched the assigned scope.
+5. API/contract changes detected, or "None".
+6. Divergences from the work package, or "None".
+7. Assumptions.
+8. Risks or blockers.
+9. Verification attempted and result.
+10. Skipped verification with concrete reasons.
+11. Confidence: high / medium / low, with reason.
+12. Recommended next action.
 
 Do not create PRs.
 Do not push branches.

@@ -30,6 +30,36 @@ Rules:
 
 If execution was requested without `package:`, select the first unblocked package from the earliest safe wave, state why, and continue unless this changes scope, requires a stacked branch decision, or conflicts with user-provided ordering.
 
+## Delegation Decision Matrix
+
+Use this matrix after the execution delegation gate and before launching KRT-owned subagents. Explain the selected path in state and in the user-facing progress update.
+
+| Package shape | Default delegation choice |
+|---|---|
+| Small package, same-file edits, sequential steps, or tightly coupled decisions | Run inline. The coordination overhead is higher than the benefit. |
+| Many files to inspect (roughly 30+), scattered docs/contracts, or uncertain local conventions | Launch one read-only `explorer`, then the lead decides whether work stays inline or moves to a worker. |
+| Clear implementation scope, defined file ownership, explicit verification, and no product decision remaining | Launch at most one mutating `worker` for the package. |
+| Fresh perspective needed after implementation, or the package touches risky surfaces | Use the main `code_review` role and optional read-only reviewer fan-out within budget. |
+| Independent packages with non-overlapping write sets and isolated worktrees/checkouts | Parallel workers are allowed only when `parallel:true` and isolation are both present. |
+| Overlapping files, unclear ownership, missing isolation, or product/branch decisions still open | Run serially inline or stop for the missing decision. |
+
+Delegation budgets:
+
+- At most one mutating worker per work package.
+- At most three read-only reviewer subagents in review fan-out.
+- Do not add a second user gate for read-only exploration or reviewer fan-out after the execution delegation gate is already accepted.
+- Do not launch more generic agents to compensate for low-confidence output. Perform one targeted follow-up exploration or review with a narrower prompt.
+
+Delegation telemetry to record in `compound-master-state.md`:
+
+- Decision: inline, explorer, worker, reviewer fan-out, or parallel workers.
+- Reason: package shape, risk surface, expected benefit, and why inline was or was not sufficient.
+- Roles used and whether each was read-only or mutating.
+- Outcome: completed, blocked, degraded to inline, or skipped.
+- Confidence: high/medium/low with the reason supplied by the lead or subagent.
+- Duration: approximate elapsed time when available.
+- Loop effect: whether delegation reduced follow-up loops, added review/fix loops, or had no clear effect.
+
 ## Work Invocation
 
 Before executing, verify that the resolved `work` role supports implementation-only/no-shipping mode. Stop before duplicate shipping if it cannot.
@@ -119,6 +149,28 @@ Loop:
 6. Stop after three rounds if blockers remain.
 
 Passing gate: Impact Scan complete when required, no actionable finding at or above threshold, no unresolved security/data/contract finding, tests pass or an acceptable verification gap is recorded, advisory findings recorded.
+
+## Optional Review Fan-Out
+
+Keep the resolved `code_review` role as the primary review. Fan-out supplements it; it does not replace the main review or the lead's synthesis.
+
+Use read-only reviewer fan-out when the package or Impact Scan touches one or more of:
+
+- auth, authorization, tenant isolation, ownership, or permissions;
+- database schema, migrations, backfills, or persistent data integrity;
+- public API contracts, generated clients, payloads, bindings, or shared helpers;
+- async jobs, queues, retries, ZKP/proof result handling, or external service callbacks;
+- performance-sensitive loops, queries, caching, or I/O-heavy paths;
+- security-sensitive input handling, secrets, PII, or exposed endpoints.
+
+Fan-out rules:
+
+- Run at most three specialized read-only reviewers.
+- Tell each reviewer the work package, origin plan, Impact Scan summary, current branch/base, and exact risk surface to inspect.
+- Require each reviewer to return severity, evidence path/line when available, blocking status against `review-threshold`, missing tests, confidence, and recommended next action.
+- The lead deduplicates findings, resolves contradictions, and writes one coherent findings document when blockers remain.
+- Reopen the work loop only for findings at or above `review-threshold`, or any unresolved security/data/contract/test blocker.
+- Log advisory findings below threshold unless the user marks them blocking.
 
 ## Release Marshal Handoff
 

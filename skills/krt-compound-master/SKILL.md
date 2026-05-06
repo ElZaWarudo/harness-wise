@@ -91,12 +91,17 @@ Portable delegated roles:
 Delegation policy:
 
 - Use delegated agents only when the host supports them and the work can be isolated safely.
+- Keep the lead as the centralized supervisor. The lead synthesizes subagent output, decides the next step, owns state updates, and controls release handoff.
+- Subagents must not coordinate with each other or hand work directly to another subagent unless the runtime provides an explicit team/task system and the current run approved that team workflow.
+- Do not add or imply a free-form swarm mode. Use bounded delegation and reviewer fan-out only when the package shape justifies it and the decision is recorded.
 - During preflight, record whether direct KRT-owned agent launch is `automatic`, `requires-approval`, or `unavailable`.
 - Distinguish direct KRT-owned agent launch from invoking another resolved skill. Do not preemptively downgrade `document_review`, `work`, or `code_review` just because that skill may internally launch agents.
 - At the start of any execution phase (`mode:execute`, `mode:resume` when resuming execution/review/release, or `mode:full` after the artifact execution gate), ask one explicit execution delegation gate before deciding whether KRT itself will launch subagents. Do this even when the runtime might support automatic launch, unless the user already included `delegation:inline`, `delegation:ask`, `parallel:true`, "con subagentes", or "sin subagentes" in the current invocation.
 - If the user approves subagents, record the approval scope in state and use KRT-owned delegated agents only for isolated, useful roles.
 - If the user declines, direct launch is unavailable, or the answer is unclear, set delegation mode to `inline` for this run, continue inline, and record the fallback.
 - `subagent-model:<value>` is advisory and runtime-specific.
+- Initial delegation budget: at most one mutating worker per work package and at most three read-only reviewer subagents in any review fan-out.
+- If a subagent returns low confidence, incomplete context, or unresolved scope assumptions, the lead performs one targeted follow-up exploration/review rather than launching more generic agents.
 - Parallel/delegated mutation requires isolated worktrees/checkouts and non-overlapping scopes. Without isolation, reviewers must be read-only and workers must not stage, commit, push, create PRs, transition Jira, or run broad mutation-prone flows.
 
 Execution delegation gate prompt:
@@ -181,7 +186,7 @@ docs/brainstorms/
 docs/plans/
 ```
 
-Maintain `docs/orchestration/compound-master-state.md`. State must track initiative, mode, date, resolved roles, runtime/delegation availability, source docs, context readiness, roadmap, brainstorms, plans, work packages, waves, branch/base choices, Impact Scan status, verification, review status, Jira/PR URLs, blockers, and required user decisions.
+Maintain `docs/orchestration/compound-master-state.md`. State must track initiative, mode, date, resolved roles, runtime/delegation availability, delegation decisions and telemetry, source docs, context readiness, roadmap, brainstorms, plans, work packages, waves, branch/base choices, Impact Scan status, verification, review status, Jira/PR URLs, blockers, and required user decisions.
 
 ## Workflow
 
@@ -211,7 +216,7 @@ Load `references/artifact-templates.md`. Create independently reviewable package
 
 ### Step 6 - Execution Wave Planning
 
-Load `references/execution-flow.md`. Ask/resolve the execution delegation gate before planning KRT-owned subagents. Classify packages as independent, dependent, overlapping, or high-risk. Execute serially unless `parallel:true` and isolation make parallel work safe.
+Load `references/execution-flow.md`. Ask/resolve the execution delegation gate before planning KRT-owned subagents. Apply the delegation decision matrix, budget, and telemetry rules before launching any subagent. Classify packages as independent, dependent, overlapping, or high-risk. Execute serially unless `parallel:true` and isolation make parallel work safe.
 
 ### Step 7 - Execute Package
 
@@ -219,7 +224,7 @@ Invoke the resolved `work` role in implementation-only/no-shipping mode. The wor
 
 ### Step 8 - Code Review And Fix Loop
 
-Invoke the resolved `code_review` role normally. Prefer autofix when safe; retry with documented report-only/inline mode only if the runtime refuses agent launch. Findings at or above `review-threshold`, or any unresolved security/data/contract/test blocker, loop through `work` and review. Stop after three blocked rounds.
+Invoke the resolved `code_review` role normally. Prefer autofix when safe; retry with documented report-only/inline mode only if the runtime refuses agent launch. For high-risk packages, use optional read-only reviewer fan-out only after the main review path is clear and within the delegation budget. Findings at or above `review-threshold`, or any unresolved security/data/contract/test blocker, loop through `work` and review. Stop after three blocked rounds.
 
 ### Step 9 - Release Marshal Handoff
 

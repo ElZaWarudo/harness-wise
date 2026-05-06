@@ -19,11 +19,17 @@ Prioritize:
 - branch/PR readiness risks
 
 Return:
-1. verdict: approve / request changes
-2. blocking findings
-3. non-blocking findings
-4. missing tests
-5. recommended next action
+1. Objective received.
+2. Files inspected.
+3. Verdict: approve / request changes.
+4. Blocking findings with severity, evidence path/line when available, and why each blocks the configured review threshold.
+5. Non-blocking findings with severity, evidence path/line when available, and why each does not block.
+6. Missing tests.
+7. Assumptions.
+8. Risks or blockers.
+9. Verification or checks performed, if any.
+10. Confidence: high / medium / low, with reason.
+11. Recommended next action.
 
 Do not edit files unless explicitly asked by the parent agent.
 Do not create commits, PRs, or Jira transitions.
