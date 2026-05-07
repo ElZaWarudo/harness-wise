@@ -9,12 +9,14 @@ Roadmap and readiness report templates are owned by the resolved `roadmap_genera
 Path:
 
 ```text
-docs/work-packages/YYYY-MM-DD-NNN-<rdm-id>-<package-slug>-work-package.md
+docs/work-packages/RDM-###-<roadmap-item-slug>/YYYY-MM-DD-NNN-<package-slug>-work-package.md
 ```
 
-Use a work package as the atomic PR/Jira unit. It may include one roadmap item, one plan U-ID, or a cohesive group of U-IDs.
+Use a work package as the atomic PR/Jira unit. It may include one roadmap item, one plan U-ID, or a cohesive group of U-IDs. Do not store all work packages in one flat directory; organize them under the roadmap item folder they belong to.
 
-Split when units have independent value, minimal file overlap, separate risk domains, and clean independent verification. Combine when units share migrations/API contracts/core files, depend tightly on each other, or would create noisy stacked PRs.
+Split when units have independent value, minimal file overlap, separate risk domains, and clean independent verification. Combine when units share migrations/API contracts/core files, depend tightly on each other, or would create noisy stacked PRs. A package may implement the full roadmap item in one integrated PR only when the plan units have strong integration/dependency coupling; this must be explicit in the grouping rationale.
+
+Work packages must align with origin plan units. A package may combine or split units, but it must make that relationship explicit and justify it. If a plan defines U1-U5, the package must say which of those units are included, excluded, deferred, or split into another package.
 
 ```markdown
 ---
@@ -25,6 +27,7 @@ origin_roadmap: docs/roadmaps/...
 origin_brainstorm: docs/brainstorms/...
 origin_plan: docs/plans/...
 units: [U1, U2]
+unit_alignment: complete|partial|split
 base_branch: [integration branch or parent branch]
 pr_strategy: [independent|stacked]
 jira_policy: [required|optional|skip]
@@ -42,8 +45,16 @@ jira_policy: [required|optional|skip]
 - Requires: [None / package IDs / branch / PR]
 - Blocks: [package IDs]
 
+## Plan Unit Alignment
+| Plan unit | Included in this package | Reason |
+|---|---|---|
+| U1 | yes/no/partial | [Why included, excluded, deferred, or split] |
+
+Grouping rationale:
+- [Why these units belong in the same PR/Jira unit, or why this package contains only part of the roadmap item]
+
 ## Implementation Units
-[Relevant U-ID summaries]
+[Relevant U-ID summaries, preserving origin plan unit names and order]
 
 ## Files and Tests
 [Repo-relative files and expected tests]
