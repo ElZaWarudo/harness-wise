@@ -1,8 +1,8 @@
 ---
 name: krt-compound-master
 description: >
-  Discovery-gated artifact-first orchestrator for compound-engineering product delivery. Validates project context,
-  creates a dependency-aware roadmap, runs brainstorm/plan/document-review loops, derives
+  Discovery-gated artifact-first orchestrator for compound-engineering product delivery. Resolves roadmap/readiness generation,
+  runs brainstorm/plan/document-review loops, derives
   mergeable work packages, and later executes each package through resolved work/code-review roles before
   handing shipping to krt-release-marshal. Use when turning an existing documented software project
   into a sequenced roadmap and PR/Jira delivery program. Runtime aliases may expose this as
@@ -28,8 +28,8 @@ Default posture: **artifact-first after discovery**. Generate durable artifacts 
 Core pipeline:
 
 1. Preflight skills, repo, branch, delegation, Jira readiness, and context.
-2. Block if project documentation is insufficient.
-3. Create a dependency-aware roadmap.
+2. Invoke the required roadmap generator to create either a roadmap or a readiness report.
+3. Review the roadmap or stop on readiness.
 4. Run one interactive brainstorm per roadmap item before writing or finalizing that item's requirements.
 5. Run one plan per reviewed brainstorm document.
 6. Review roadmap, brainstorms, plans, and work packages with the resolved document-review role.
@@ -40,8 +40,8 @@ Core pipeline:
 
 ## Load References
 
-- Load `references/context-readiness.md` for Step 1 context sufficiency checks and context-blocked reports.
-- Load `references/artifact-templates.md` before writing roadmap, work-package, artifact closeout, or summary files.
+- Roadmap/readiness criteria and templates are owned by the resolved `roadmap_generator` role.
+- Load `references/artifact-templates.md` before writing work-package, artifact closeout, or summary files.
 - Load `references/execution-flow.md` for Steps 6-9 execution, verification, code-review, and release handoff detail.
 - Load `references/status-and-failures.md` when updating state, selecting statuses, or producing blocker/closeout output.
 
@@ -52,7 +52,7 @@ Core pipeline:
 - Treat `Skill("<role>", "...")` examples as orchestration pseudocode. Translate them to the current runtime's actual skill, command, or agent API.
 - Use document-review roles for documents and code-review roles for implementation/diffs.
 - Do not implement before a written and reviewed plan exists.
-- Do not generate a roadmap when context is insufficient. Context insufficiency is blocking.
+- Do not continue past roadmap generation when context is insufficient. Context insufficiency is blocking and should come from the resolved `roadmap_generator` readiness report.
 - Do not skip the interactive brainstorm for a roadmap item merely because the roadmap, existing docs, or prior references look detailed. Existing context can seed the questions, but the user owns product and architecture decisions.
 - Treat "continue", "resume", "next step", or "siguiente paso" as permission to advance to the next required gate, not as permission to bypass the brainstorm conversation.
 - Skip or compress brainstorm only when the current invocation explicitly asks to skip discovery, run non-interactively, or use existing decisions as final. Record that override in state and list the risks.
@@ -129,6 +129,7 @@ Resolve these logical roles during preflight:
 
 | Role | Canonical portable skill | Required when | Known runtime aliases |
 |---|---|---|---|
+| `roadmap_generator` | `krt-roadmap-cartographer` | artifact generation | `krt:roadmap-cartographer`, runtime roadmap cartographer equivalent |
 | `brainstorm` | `ce-brainstorm` | artifact generation | `/ce-brainstorm`, `ce:brainstorm`, `compound-engineering:ce-brainstorm` |
 | `plan` | `ce-plan` | artifact generation | `/ce-plan`, `ce:plan`, `compound-engineering:ce-plan` |
 | `document_review` | `document-review` | artifact generation | `/ce-doc-review`, `ce-doc-review`, `compound-engineering:document-review` |
@@ -150,7 +151,7 @@ Resolution order:
 
 Blocking policy:
 
-- Missing `brainstorm`, `plan`, or `document_review`: stop immediately.
+- Missing `roadmap_generator`, `brainstorm`, `plan`, or `document_review`: stop immediately.
 - Missing `work` or `code_review`: complete artifact generation if possible, then stop before execution.
 - Missing `project_pr` or component skills: stop before shipping and suggest:
   `npx -y skills add ElZaWarudo/krt --skill krt-release-marshal --skill krt-gitflow-knight --skill krt-rebase-smith --skill krt-jira-scribe -g`
@@ -198,13 +199,22 @@ Maintain `docs/orchestration/compound-master-state.md`. State must track initiat
 
 Resolve roles, record runtime/delegation availability, confirm repo status, identify integration base (`develop` if present, otherwise GitHub default), inspect working tree, check for `STRATEGY.md` when product intent is unclear, update state, and check only the presence of Jira env vars (`JIRA_HOST`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEY`).
 
-### Step 1 - Context Sufficiency Gate
+### Step 1 - Roadmap Generator Gate
 
-Load `references/context-readiness.md`. If context is insufficient, write a readiness report and stop with a context-blocked closeout.
+Invoke the resolved `roadmap_generator` role for the initiative. The role must return exactly one primary artifact classification:
 
-### Step 2 - Roadmap Generation
+```text
+artifact_kind: roadmap | readiness-report
+artifact_path: docs/...
+```
 
-Load `references/artifact-templates.md`. Create the next `docs/roadmaps/YYYY-MM-DD-NNN-<initiative-slug>-roadmap.md`. Review it with the resolved `document_review` role and fix blockers without inventing product behavior.
+If `artifact_kind` is `readiness-report`, update `compound-master-state.md` with the readiness path, missing context summary, and recommended next prompt. Stop with a context-blocked closeout.
+
+If `artifact_kind` is `roadmap`, update `compound-master-state.md` with the roadmap path and continue to Step 2.
+
+### Step 2 - Roadmap Review
+
+Review the roadmap from `roadmap_generator` with the resolved `document_review` role and fix blockers without inventing product behavior. Ask only when findings change scope, behavior, dependency order, or PR strategy.
 
 ### Step 3 - Brainstorm Per Roadmap Item
 

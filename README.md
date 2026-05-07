@@ -22,6 +22,7 @@ Formal skill IDs use the Every-style hyphen form (`krt-*`). Some runtimes may ex
 | Alias | Formal skill ID | Purpose |
 |---|---|---|
 | `$krt:harness-wise` | `krt-harness-wise` | Build or review a compact coding harness before implementation. Good for repo reconnaissance, context curation, stale-doc checks, risk estimates, and skill recommendations. |
+| `$krt:roadmap-cartographer` | `krt-roadmap-cartographer` | Generate exactly one roadmap or readiness report from existing project context before compound delivery. |
 | `$krt:compound-master` | `krt-compound-master` | Orchestrate larger delivery programs: context gate, roadmap, brainstorms, plans, document reviews, work packages, execution gates, code review, and PR/Jira handoff. |
 | `$krt:release-marshal` | `krt-release-marshal` | Direct the final delivery march: commits, rebase, Jira, push, PR creation, reviewer requests, and Jira review follow-up. |
 | `$krt:gitflow-knight` | `krt-gitflow-knight` | Keep branch hygiene and atomic commits in formation. |
@@ -55,6 +56,8 @@ Turn a documented initiative into delivery artifacts:
 ```text
 Use $krt:compound-master for docs/specs/reporting.md mode:artifacts
 ```
+
+`krt-compound-master` expects `krt-roadmap-cartographer` to be available as its required roadmap generator. Install both when you want the full artifact pipeline.
 
 Resume execution from existing orchestration state:
 
@@ -116,6 +119,9 @@ npm exec --yes --package skills -- skills update
 ```text
 skills/
   krt-harness-wise/
+    SKILL.md
+    references/
+  krt-roadmap-cartographer/
     SKILL.md
     references/
   krt-compound-master/

@@ -1,72 +1,8 @@
 # Artifact Templates
 
-Use this reference when Compound Master writes roadmaps, work packages, artifact closeouts, or final summaries.
+Use this reference when Compound Master writes work packages, artifact closeouts, or final summaries.
 
-## Roadmap
-
-Path:
-
-```text
-docs/roadmaps/YYYY-MM-DD-NNN-<initiative-slug>-roadmap.md
-```
-
-Use the next available zero-padded sequence for the date and slug. Resume/update only when explicit; never overwrite silently.
-
-```markdown
----
-title: [Roadmap title]
-status: active
-date: YYYY-MM-DD
-source_docs:
-  - path/to/source.md
----
-
-# [Roadmap title]
-
-## Context Sufficiency Summary
-- [What was found]
-- [Why this is enough]
-
-## Source Inventory
-| Source | Contribution | Confidence |
-|---|---|---|
-
-## Roadmap Items
-- RDM-001. **[Item name]**
-  - Outcome: [user/system outcome]
-  - Why now: [reason from docs]
-  - Scope boundary: [included/excluded]
-  - Hard depends on: [None / RDM-###]
-  - Soft sequencing preference: [None / RDM-###]
-  - Blocks/enables: [RDM-###]
-  - Risk: [low/medium/high + why]
-  - Expected brainstorm: `docs/brainstorms/...`
-  - Expected plan: `docs/plans/...`
-  - Suggested package: [roadmap-item / split by U-ID later]
-
-## Dependency Graph
-[Mermaid graph or bullet dependency map]
-
-## Parallelization Waves
-- Wave 1: [independent items]
-- Wave 2: [items depending on Wave 1]
-
-## Branch and PR Strategy
-| Package candidate | Base branch | PR type | Dependency | Notes |
-|---|---|---|---|---|
-
-## Blockers and User Decisions
-- [Decision needed before brainstorm/plan/work]
-```
-
-Dependency rules:
-
-- Hard dependency = cannot safely implement dependent item before prerequisite.
-- Soft sequencing = preference, not blocker.
-- Mark independent items for possible parallel work.
-- If uncertainty affects branch strategy or product behavior, ask before execution.
-
-Review the roadmap with resolved `document_review`, apply safe fixes, and ask only when findings change scope, behavior, dependency order, or PR strategy.
+Roadmap and readiness report templates are owned by the resolved `roadmap_generator` role, canonically `krt-roadmap-cartographer`. Compound Master consumes those artifacts; it does not define their canonical shape here.
 
 ## Work Package
 
