@@ -13,6 +13,7 @@ argument-hint: >
   [package:<work-package-path>]
   [pr-granularity:auto|roadmap-item|plan-unit]
   [jira-policy:required|optional|skip]
+  [production:unknown|live|preprod|prototype]
   [parallel:true|false]
   [delegation:auto|ask|inline]
   [review-threshold:P0-P2|P0-P1|P0]
@@ -28,6 +29,7 @@ Default posture: **artifact-first after discovery**. Generate durable artifacts 
 Core pipeline:
 
 1. Preflight skills, repo, branch, delegation, Jira readiness, and context.
+1. Resolve production posture: whether this is a live production system, pre-production system, prototype, or unknown.
 2. Invoke the required roadmap generator to create either a roadmap or a readiness report.
 3. Review the roadmap or stop on readiness.
 4. Run one interactive brainstorm per roadmap item before writing or finalizing that item's requirements.
@@ -60,6 +62,9 @@ Core pipeline:
 - Treat "continue", "resume", "next step", or "siguiente paso" as permission to advance to the next required gate, not as permission to bypass the brainstorm conversation.
 - Skip or compress brainstorm only when the current invocation explicitly asks to skip discovery, run non-interactively, or use existing decisions as final. Record that override in state and list the risks.
 - Do not invent product behavior, authorization rules, data contracts, Jira transitions, release constraints, branch bases, or dependency edges. Ask one blocking question at a time.
+- Do not invent production posture. If the repo or user context does not make clear whether the system is live, pre-production, prototype, or unknown, record `production:unknown` and ask before making risky compatibility, migration, deletion, rollback, or data-shape decisions.
+- Treat `production:live` as a compatibility-preserving default: prefer additive changes, feature flags, migrations with rollback/forward plans, backwards-compatible API changes, explicit deployment notes, and stronger regression evidence. Breaking pre-existing behavior requires explicit user/product approval and recorded rationale.
+- Treat `production:prototype` as permission to move faster only after recording that posture. Even then, do not remove user data, credentials, security controls, or documented contracts without explicit approval.
 - Use repo-relative paths in generated documents.
 - Do not edit CE plan bodies as progress checklists. Progress lives in `compound-master-state.md`, work-package status, task tracking, commits, Jira, and PRs.
 - A PR unit is a **work package**, not every plan bullet. Avoid PR-per-microtask.
@@ -178,6 +183,7 @@ Blocking policy:
 - `mode:full`: generate artifacts, return the artifact closeout, ask one execution gate, then execute the recommended first package or first safe wave.
 - `mode:resume`: continue from the next incomplete state item; first summarize why it was selected.
 - `package:<work-package-path>`: execute or resume only that package.
+- `production:unknown|live|preprod|prototype`: sets the production posture. Default `unknown` unless explicit user context or strong repo evidence supports another value.
 - `pr-granularity:auto|roadmap-item|plan-unit`: default `auto`, based on dependency, file overlap, risk, and reviewability.
 - `jira-policy:required|optional|skip`: default `required`; `optional` allows user-approved PR without Jira if config is missing.
 - `parallel:false|true`: default `false`; `true` requires safe dependencies, no dangerous overlap, and isolated worktrees/checkouts.
@@ -204,13 +210,21 @@ docs/brainstorms/
 docs/plans/
 ```
 
-Maintain `docs/orchestration/compound-master-state.md`. State must track initiative, mode, date, resolved roles, runtime/delegation availability, delegation decisions and telemetry, source docs, context readiness, roadmap, brainstorms, plans, work packages, waves, branch/base choices, Impact Scan status, security watch notes, security review status, CI break-prevention checks, surface-aware verification, review status, Jira/PR URLs, release-follow-up blockers, and required user decisions.
+Maintain `docs/orchestration/compound-master-state.md`. State must track initiative, mode, date, resolved roles, runtime/delegation availability, delegation decisions and telemetry, source docs, context readiness, production posture, roadmap, brainstorms, plans, work packages, waves, branch/base choices, Impact Scan status, security watch notes, security review status, CI break-prevention checks, surface-aware verification, review status, Jira/PR URLs, release-follow-up blockers, and required user decisions.
 
 ## Workflow
 
 ### Step 0 - Preflight
 
-Resolve roles, record runtime/delegation availability, confirm repo status, identify integration base (`develop` if present, otherwise GitHub default), inspect working tree, check for `STRATEGY.md` when product intent is unclear, update state, and check only the presence of Jira env vars (`JIRA_HOST`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEY`).
+Resolve roles, record runtime/delegation availability, confirm repo status, identify integration base (`develop` if present, otherwise GitHub default), inspect working tree, check for `STRATEGY.md` when product intent is unclear, resolve production posture, update state, and check only the presence of Jira env vars (`JIRA_HOST`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEY`).
+
+Production posture resolution:
+
+- Accept an explicit argument first: `production:live`, `production:preprod`, `production:prototype`, or `production:unknown`.
+- Otherwise infer only from strong evidence such as production deploy docs, live environment config, incident/runbook docs, release history, real user/data language, or explicit prototype/sandbox language.
+- If evidence is mixed or weak, set `production:unknown` and ask a single blocking question before any package would change persistence, API compatibility, auth, tenant behavior, deployment, data deletion, irreversible migrations, or existing user workflows.
+- Record the posture, evidence, confidence, and consequences in `compound-master-state.md`.
+- Feed the posture into roadmap review, brainstorm questions, work-package risk classification, verification gates, release handoff, and rollback/deployment notes.
 
 ### Step 1 - Roadmap Generator Gate
 

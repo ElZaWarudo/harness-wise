@@ -18,12 +18,15 @@ Classify packages:
 - Dependent: requires another package, branch, PR, schema, API, or merged change.
 - Overlapping: touches files also touched by another package.
 - High-risk: auth, security, payments, PII, migrations, public API, deployment, permissions, external APIs, shared contracts.
+- Production-sensitive: `production:live` or `production:unknown` plus any change to existing behavior, persistence, API contracts, auth/tenant rules, deployment/config, migrations, data deletion, user workflows, or rollback expectations.
 
 Rules:
 
 - Independent packages may branch from the integration base.
 - Dependent packages wait for merge or become stacked PRs based on parent branch.
 - Overlapping/high-risk packages run serially unless the user explicitly accepts risk and isolation exists.
+- Production-sensitive packages run serially by default, require explicit compatibility/rollback evidence, and cannot intentionally break existing behavior without recorded user approval.
+- Prototype packages may run with lighter compatibility gates, but still require explicit approval for destructive data operations, credential/security weakening, or public contract removal.
 - `parallel:false` forces serial execution.
 - `parallel:true` requires isolated worktrees/checkouts and non-overlapping scopes.
 - Parallel subagents without isolation must not stage, commit, push, create PRs, transition Jira, or run broad mutation-prone flows.
@@ -63,6 +66,8 @@ Delegation telemetry to record in `compound-master-state.md`:
 ## Work Invocation
 
 Before executing, verify that the resolved `work` role supports implementation-only/no-shipping mode. Stop before duplicate shipping if it cannot.
+
+Carry production posture into every worker prompt. For `production:live` or `production:unknown`, instruct the worker to preserve existing behavior by default, prefer additive/compatible changes, call out any possible breaking change before implementing it, and return migration, rollback, deployment, and regression-test implications. For `production:prototype`, instruct the worker which compatibility gates are intentionally relaxed and which safety boundaries still apply.
 
 Preserve plan-unit granularity during execution. A work package is the PR/Jira unit, not a license to flatten the origin plan. Before invoking `work`, extract the package's implementation units from the work package and origin plan. Track each unit's status in `compound-master-state.md` as pending, in-progress, implemented, verified, skipped, or blocked.
 
@@ -121,6 +126,7 @@ Completion gate:
 
 - Expected files changed/created.
 - Every implementation unit included in the package has an explicit disposition: implemented, verified, skipped with reason, or blocked.
+- Production posture satisfied: live/unknown packages include compatibility, migration/deployment, rollback, and regression evidence for touched surfaces, or a recorded approval for intentional breakage.
 - Impact Scan complete when API contracts, endpoints, bindings, shared helpers, schemas, payloads, auth/tenant/ownership behavior, or test fixture contracts changed.
 - Relevant tests run or a no-test justification recorded.
 - Consumer-derived tests from the Impact Scan run, or documented as skipped with concrete local blocker and CI coverage expectation.
@@ -181,6 +187,7 @@ Changed surfaces:
 - Persistence/schema: verified by <test/inspection> or skipped because <reason>
 - Config/deployment: verified by <test/inspection> or skipped because <reason>
 - Docs/orchestration: verified by <review/inspection> or skipped because <reason>
+- Production compatibility: verified by <regression/backward compatibility/migration/rollback evidence> or intentionally relaxed because <prototype/approved rationale>
 ```
 
 Omit unchanged surfaces. If a surface changed and no evidence exists, keep the package out of `review-passed` unless the gap is explicitly acceptable for the package risk and CI is expected to cover it.

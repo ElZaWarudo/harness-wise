@@ -31,6 +31,7 @@ unit_alignment: complete|partial|split
 base_branch: [integration branch or parent branch]
 pr_strategy: [independent|stacked]
 jira_policy: [required|optional|skip]
+production_posture: [unknown|live|preprod|prototype]
 ---
 
 # [Work package title]
@@ -44,6 +45,13 @@ jira_policy: [required|optional|skip]
 ## Dependencies
 - Requires: [None / package IDs / branch / PR]
 - Blocks: [package IDs]
+
+## Production Posture
+- Posture: [unknown|live|preprod|prototype]
+- Evidence: [user statement, docs/config/release evidence, or "not established"]
+- Confidence: [high|medium|low]
+- Consequences for this package: [compatibility expectations, migration/deployment caution, or speed/flexibility allowed]
+- Breaking existing behavior allowed: [no / only with explicit approval / yes because prototype and approved]
 
 ## Plan Unit Alignment
 | Plan unit | Included in this package | Reason |
@@ -70,6 +78,7 @@ Grouping rationale:
 ## Verification Gate
 - [Commands/outcomes that must pass]
 - Surface-aware evidence: [changed surfaces and the test/inspection evidence for each]
+- Production posture evidence: [for live/unknown systems, regression/compatibility/migration/rollback evidence required for touched surfaces; for prototype, note any intentionally relaxed checks]
 
 ## Review Gate
 - Code review threshold: [configured `review-threshold`; default P0-P2]
@@ -98,6 +107,7 @@ Grouping rationale:
 - PR title:
 - PR body bullets:
 - Verification results location:
+- Production/deployment notes: [required for live/unknown systems when behavior, schema, config, or deployment changes; otherwise none]
 
 ## Jira Handoff Inputs
 - Jira policy: [required|optional|skip]
