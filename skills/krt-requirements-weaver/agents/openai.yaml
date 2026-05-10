@@ -1,0 +1,4 @@
+interface:
+  display_name: "krt-requirements-weaver"
+  short_description: "Refine and validate software requirements"
+  default_prompt: "Use krt-requirements-weaver to turn a rough problem statement into refined and validated software requirements."
