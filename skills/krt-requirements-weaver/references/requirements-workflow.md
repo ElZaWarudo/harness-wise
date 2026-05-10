@@ -2,6 +2,8 @@
 
 Use this workflow to move from a rough brief to a validated requirements packet without jumping into solution design too early.
 
+The workflow is intentionally gap-seeking. It should prefer exposing and resolving missing information through focused questions rather than smoothing over ambiguity with plausible assumptions.
+
 ## 1. Reception And Analysis
 
 Capture the minimum frame first:
@@ -14,6 +16,8 @@ Capture the minimum frame first:
 - known scope
 - known constraints
 - unknowns and contradictions
+
+Treat unknowns as first-class work items. They are not side notes; they are the core reason elicitation exists.
 
 Answer these questions as early as possible:
 
@@ -28,9 +32,38 @@ If the input mixes requirements with solution ideas, split them:
 - keep the need as a requirement candidate
 - keep the proposed solution as a suggestion or constraint only if the source truly mandates it
 
+## 1.5 Gap Analysis Before Refinement
+
+Before rewriting requirements, inspect the input for gaps that would make refinement misleading.
+
+Look for missing or weak information in these areas:
+
+- problem or business outcome
+- primary user or approver
+- scope in and scope out
+- trigger events and normal flow
+- edge cases and error handling
+- business rules or policies
+- data requirements
+- external integrations
+- non-functional expectations
+- acceptance criteria
+
+When a gap is material, ask a focused clarification question before refining further.
+
+Prioritize questions in this order:
+
+1. gaps that change scope
+2. gaps that change core behavior
+3. gaps that change validation or acceptance
+4. gaps that affect quality attributes or integrations
+5. lower-risk detail gaps
+
 ## 2. Elicitation And Refinement
 
 Move from vague intention to concrete, reviewable statements.
+
+Do not let refinement hide uncertainty. If you cannot refine a requirement honestly without inventing behavior, stop and ask.
 
 ### Refinement moves
 
@@ -40,6 +73,7 @@ Move from vague intention to concrete, reviewable statements.
 - surface business rules hidden inside prose
 - attach measurable acceptance criteria when the requirement will later be tested
 - convert implied exclusions into explicit out-of-scope notes
+- convert unresolved ambiguity into explicit questions instead of silently deciding it
 
 ### Choose the lightest useful artifact
 
@@ -82,6 +116,7 @@ Check:
 - Are conflicts between stakeholders or rules called out explicitly?
 - Are acceptance criteria present where ambiguity would otherwise survive?
 - Is the scope boundary visible?
+- Are the remaining open questions truly minor, or would any of them still change scope or behavior?
 
 ## 4. Default Deliverable
 
@@ -96,8 +131,9 @@ Unless the user asks for a different artifact, produce a compact packet with:
 7. Non-functional requirements
 8. Business rules
 9. Acceptance criteria
-10. Assumptions and open questions
-11. Validation status
+10. Gaps resolved
+11. Assumptions and open questions
+12. Validation status
 
 ## 5. Handoff Rule
 

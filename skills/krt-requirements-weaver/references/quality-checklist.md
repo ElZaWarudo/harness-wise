@@ -47,6 +47,7 @@ The overall set should be:
 - bounded by visible in-scope and out-of-scope lines
 - feasible as a release or increment
 - prioritized when tradeoffs or sequencing matter
+- explicit about unresolved gaps instead of masking them
 
 ## Validation Gate
 
@@ -57,5 +58,6 @@ Treat the packet as ready for validation only when most answers are yes:
 - Do the non-functional requirements capture the quality risks that actually matter?
 - Are business rules and constraints separated from features?
 - Are acceptance criteria present for the requirements that would otherwise invite interpretation drift?
+- Were the main ambiguities resolved through elicitation instead of guessed by the author?
 - Are assumptions and open questions visible instead of hidden?
 - Could another agent plan implementation without inventing core product behavior?
