@@ -333,13 +333,16 @@ PR tree safety:
 
 - Independent PRs target integration/default branch.
 - Stacked PRs target parent package branch and declare dependency in PR body.
+- When the user asks to continue while a parent PR is pending merge, prefer the next ready package as a stacked PR from the parent PR branch when dependencies and review scope allow it.
+- If stacked PRs are awkward but the next package can proceed, record the exact clean-tree strategy and intended `krt-rebase-smith` normalization path before starting work.
+- Waiting for merge is a blocker only when the next package needs the merged artifact, the parent PR has unresolved release-follow-up blockers, or no clean branch/base strategy can be named.
 - Do not retarget stacked PRs silently.
 - Do not combine unrelated roadmap items unless grouped in one package.
 - If an open PR exists for the branch, do not create a duplicate.
 - If Jira is required and config is missing, stop with a configuration blocker.
 - If Jira is optional and config is missing, let `krt-release-marshal` ask whether to continue without Jira.
 
-After handoff, record Jira URL, PR URL, status, branch, base, reviewers, CI break-prevention evidence, and blockers in state. Do not start a CI polling loop from Compound Master.
+After handoff, record Jira URL, PR URL, status, branch, base, reviewers, CI break-prevention evidence, blockers, and any stacked/clean-tree continuation strategy in state. Do not start a CI polling loop from Compound Master.
 
 ## CI Break-Prevention And Escalation
 
