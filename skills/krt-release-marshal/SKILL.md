@@ -21,6 +21,7 @@ Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body detai
 - Use the host runtime's command wrapper only when the current repo requires one.
 - Use `gh` for GitHub PR operations.
 - Never create a PR from protected branches: `main`, `master`, or `develop`.
+- Never merge PRs or branches without explicit user approval for that exact merge action, even after a release plan was accepted.
 - Prefer `develop` as PR base when it exists; otherwise use the repository default branch unless the user or enclosing workflow provided a base.
 - Never include LLM attribution in PR title/body or commit messages.
 - Never include Compound Master planning IDs or package numbers in PR titles, PR body bullets, branch names, or commit messages unless the user or repo convention explicitly requires them.
@@ -40,6 +41,7 @@ The workflow has one initial plan acceptance gate. After the user accepts that p
 
 Ask before destructive, irreversible, external, or notification-causing work unless that exact action was explicitly included in the accepted plan:
 
+- PR or branch merge.
 - Jira issue/subtask creation or updates.
 - Jira transition.
 - Push or `--force-with-lease` push.

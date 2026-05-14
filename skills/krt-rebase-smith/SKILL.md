@@ -30,6 +30,7 @@ the correct base branch.
 - Use `rebase --onto` when the target contains parent-branch commits that should not be replayed.
 - If the branch was already pushed, use `--force-with-lease` (never plain `--force`).
 - Show the exact push command and ask for confirmation before any force-with-lease push.
+- Do not merge branches or PRs. This skill may recommend a merge strategy, but it must only run a merge after the user explicitly approves that exact merge action.
 - Avoid destructive commands (`reset --hard`, `push --force`) unless explicitly requested.
 - Do not resolve conflicts silently. Present conflicted files and ask for direction unless the fix is obvious and the user asked for autonomous resolution.
 - Use the host runtime's command wrapper only when the current repo requires one. The command examples below use plain `git` for portability.
@@ -170,7 +171,8 @@ git push -u origin <target>
 ### 7) Closeout and merge recommendation
 
 Explain to the user that after rebasing, the PR from `<target>` to the selected
-base should show only commits owned by `<target>`.
+base should show only commits owned by `<target>`. Do not merge the PR or branch
+unless the user explicitly approves that exact merge action.
 
 Recommend merge strategy based on preference:
 
