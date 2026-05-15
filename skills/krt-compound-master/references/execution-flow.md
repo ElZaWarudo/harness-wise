@@ -1,6 +1,6 @@
 # Execution Flow
 
-Use this reference for Compound Master Steps 6-11.
+Use this reference for Compound Master's execution phase: Execution Wave Planning through Release Marshal Handoff.
 
 ## Wave Planning
 

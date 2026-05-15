@@ -54,7 +54,7 @@ Core pipeline:
 
 - Roadmap/readiness criteria and templates are owned by the resolved `roadmap_generator` role.
 - Load `references/artifact-templates.md` before writing work-package, artifact closeout, or summary files.
-- Load `references/execution-flow.md` for Steps 6-11 execution, verification, code-review, CI break-prevention, and release handoff detail.
+- Load `references/execution-flow.md` for execution-phase detail from Execution Wave Planning through Release Marshal Handoff.
 - Load `references/status-and-failures.md` when updating state, selecting statuses, or producing blocker/closeout output.
 
 ## Non-Negotiable Rules
@@ -285,7 +285,7 @@ open_decisions: none | [decision that still blocks planning]
 
 `brainstorm_path` records the discovery conversation or notes. `planning_input_path` is the reviewed requirements/decisions artifact that the `plan` role must consume. They may be the same file when the resolved brainstorm role combines discovery and requirements in one artifact.
 
-If the user explicitly skips brainstorm, record the override and assumptions in `compound-master-state.md`, mark the generated requirements as assumption-backed, and include follow-up decisions in the document. User product decisions remain with existing docs or the user. Review `planning_input_path` with `document_review` and loop safe fixes before planning.
+Review `planning_input_path` with `document_review`; loop blockers and safe fixes before Step 4. If the user explicitly skips brainstorm, record the override and assumptions in `compound-master-state.md`, mark the generated requirements as assumption-backed, and include follow-up decisions in the document. User product decisions remain with existing docs or the user, but `planning_input_path` still requires review before planning.
 
 ### Step 4 - Plan Per Reviewed Requirements Artifact
 
