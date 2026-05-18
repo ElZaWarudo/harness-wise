@@ -26,6 +26,7 @@ Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body detai
 - Never include LLM attribution in PR title/body or commit messages.
 - Never include Compound Master planning IDs or package numbers in PR titles, PR body bullets, branch names, or commit messages unless the user or repo convention explicitly requires them.
 - Never put both parent and child Jira references in commit messages. If repo convention requires a Jira reference or link in a commit, use only the immediately relevant issue: usually the subtask/work-package issue; use the parent only when no child issue exists.
+- Jira issue and subtask summaries/descriptions created or proposed by Release Marshal must be in Spanish. Translate English branch names, commit summaries, PR titles, or upstream suggested Jira text into concise Spanish before passing them to `krt-jira-scribe`.
 - Never include secrets, tokens, credentials, or internal environment dumps in the PR body.
 - Treat verification results from upstream workflows as readiness evidence only. Do not include test commands, test output, or verification summaries in the PR body unless the user, repo template, or project convention explicitly requires it.
 - Do not run tests, linters, or formatters unless the user explicitly asks; use verification results supplied by the user or upstream workflow.
@@ -60,6 +61,7 @@ Use context already provided by the user or previous skills:
 
 - Desired workflow scope: full flow or PR-only.
 - Jira parent issue key, subtask key, or issue URL.
+- Suggested Jira summary/description from an enclosing workflow. Treat these as semantic input, not final text; normalize them into Spanish before Jira creation proposals.
 - Target/base branch.
 - PR title/body preference.
 - Draft vs ready preference.
@@ -94,7 +96,7 @@ Build and show a phase plan. The visible message must use this shape:
 Approve this release plan?
 ```
 
-Fill every line with a concrete value such as `needed`, `skipped`, `automatic after PR`, or `will ask before running`. Include exact branch names, Jira issue keys/URLs when known, push commands when known, PR draft/ready intent, reviewer behavior, and Jira transition behavior. If a value is not known yet, say what local read-only step will resolve it inside the accepted plan.
+Fill every line with a concrete value such as `needed`, `skipped`, `automatic after PR`, or `will ask before running`. Include exact branch names, Jira issue keys/URLs when known, Spanish Jira summary/description to create when known, push commands when known, PR draft/ready intent, reviewer behavior, and Jira transition behavior. If a value is not known yet, say what local read-only step will resolve it inside the accepted plan.
 
 The plan must be in the final/user-visible response for the gate. Do not only summarize that a plan exists. Do not continue into commit, rebase, Jira creation/update, push, PR creation/update, reviewer request, or Jira transition until the user accepts this visible plan.
 
@@ -134,7 +136,14 @@ Unless the user explicitly skips history cleanup, load and follow `krt-rebase-sm
 
 If Jira context was provided, keep it.
 
-If Jira context is missing and Jira should be included, load and follow `krt-jira-scribe`. Use Jira Server/Data Center only. For PRs that look like a work package or one item in a larger delivery sequence, prefer finding or creating a parent task plus a subtask for the PR. Create a standalone task only when the work is clearly standalone or the user requests it. Create or reuse Jira issues only after confirmation. Capture the immediately relevant Jira URL for the PR body, usually the subtask for this PR.
+If Jira context is missing and Jira should be included, load and follow `krt-jira-scribe`. Use Jira Server/Data Center only. For PRs that look like a work package or one item in a larger delivery sequence, prefer finding or creating a parent task plus a subtask for the PR. Create a standalone task only when the work is clearly standalone or the user requests it. Before proposing creation, derive Spanish Jira text:
+
+- Summary: concise Spanish action phrase, no branch prefixes, no Conventional Commit type, no Jira key, no Compound Master IDs, and no package/date numbers.
+- Description: 1-3 concise Spanish sentences explaining what must be done and why.
+- If an enclosing workflow supplied English suggested Jira text, translate it to Spanish while preserving the intended scope.
+- If the work domain contains unavoidable English product/API names, keep those terms but write the surrounding title and description in Spanish.
+
+Pass the Spanish summary and description explicitly to `krt-jira-scribe`. Create or reuse Jira issues only after confirmation. Capture the immediately relevant Jira URL for the PR body, usually the subtask for this PR.
 
 If required Jira env vars are missing, stop the Jira phase and ask whether to continue PR creation without Jira links.
 

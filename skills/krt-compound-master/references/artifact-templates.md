@@ -122,8 +122,8 @@ Grouping rationale:
 - Jira policy: [required|optional|skip]
 - Suggested issue type: Tarea
 - Suggested subtask behavior: create/reuse subtask when parent is provided; if no parent fits and this package may have sibling PRs/work packages, prefer creating a parent task plus a subtask for this package, with the parent added to the active sprint unless explicitly skipped
-- Jira summary: [semantic title without roadmap/package numbers]
-- Jira description: [concise scope/reason without roadmap/package numbers]
+- Jira summary: [Spanish semantic title without roadmap/package numbers]
+- Jira description: [Spanish concise scope/reason without roadmap/package numbers]
 ```
 
 Review every package with `document_review`. Fix blockers before execution.
@@ -134,8 +134,8 @@ Keep internal planning identifiers out of public/reviewer-facing text:
 
 - Do not include `RDM-001`, `U1`, date sequences, package numbers, or work-package sequence numbers in Jira summaries/descriptions, commit messages, PR titles, PR body bullets, or branch names.
 - Use semantic names that describe the capability or fix: `feat/tenant-permission-bundles`, not `feat/rdm-001-tenant-permission-bundles`.
-- Jira summaries should read like work items a teammate would understand without the orchestration plan.
-- Jira descriptions should explain scope and reason in concise prose, not restate roadmap IDs or package numbers.
+- Jira summaries should be in Spanish and read like work items a teammate would understand without the orchestration plan.
+- Jira descriptions should be in Spanish and explain scope and reason in concise prose, not restate roadmap IDs or package numbers.
 - PR titles and commit messages should be value-oriented and conventional; put traceability in artifact metadata, PR dependency notes, or Jira links instead of the title.
 - When commit messages or PR bodies include Jira traceability, include only the immediately relevant issue link/key, usually the subtask for this PR/work package. Do not include both parent and child unless the user or repo convention explicitly asks.
 - Keep IDs only in internal fields such as `roadmap_item`, `units`, origin paths, dependency tables, and state.

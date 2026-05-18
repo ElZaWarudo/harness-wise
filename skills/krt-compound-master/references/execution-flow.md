@@ -382,8 +382,8 @@ Origin plan: <origin-plan-path>
 Current branch: <branch-name>
 Intended base: <base-branch>
 Jira policy: <required|optional|skip>
-Suggested Jira summary: <summary>
-Suggested Jira description: <description>
+Suggested Jira summary: <Spanish summary>
+Suggested Jira description: <Spanish description>
 Suggested PR title: <title>
 Suggested PR body bullets:
 - <change>
@@ -402,7 +402,7 @@ CI risk notes for release-readiness only:
 Use krt-release-marshal exactly. Do not run tests unless the user explicitly asks; use the verification results and CI risk notes above only to decide readiness. Do not include tests, verification summaries, or CI risk notes in the PR body unless the user, repo template, or project convention explicitly requires them. Include automatic reviewer handling in the release plan: use explicit reviewers if provided, otherwise infer a clear reviewer after PR creation and request review without asking a second time; skip reviewer assignment if no clear human reviewer exists. Include automatic post-PR Jira transition to En Revisión in the release plan when Jira context exists; after PR creation, use krt-jira-scribe and the real transition list to perform that approved transition without asking a second time.")
 ```
 
-Suggested Jira summary/description, PR title/body bullets, branch name, suggested commit groups, and eventual commit messages must be semantic. Do not include roadmap IDs, U-IDs, package numbers, date sequences, or other Compound Master numbering unless the user or repo convention explicitly requires them.
+Suggested Jira summary/description must be semantic Spanish text. PR title/body bullets, branch name, suggested commit groups, and eventual commit messages must be semantic and follow repository language/conventions. Do not include roadmap IDs, U-IDs, package numbers, date sequences, or other Compound Master numbering unless the user or repo convention explicitly requires them.
 
 PR tree safety:
 
