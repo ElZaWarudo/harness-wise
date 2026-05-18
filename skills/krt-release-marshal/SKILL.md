@@ -40,6 +40,8 @@ Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body detai
 
 The workflow has one initial plan acceptance gate. After the user accepts that plan, proceed through local/reversible phases without asking again: branch creation/switching, staging, local commits, local rebase on unpushed branches, reading repo/GitHub/Jira state, and preparing PR text.
 
+The release plan is a user-visible contract, not internal reasoning. Emit it in the assistant's visible response before changing local state or invoking component skills that mutate state. Do not leave the plan only in analysis/thought. If the runtime has separate reasoning and final-response channels, the plan must appear in the final/user-visible message.
+
 Ask before destructive, irreversible, external, or notification-causing work unless that exact action was explicitly included in the accepted plan:
 
 - PR or branch merge.
@@ -74,7 +76,29 @@ If the user asks simply to create a PR and there are uncommitted changes or no J
 
 Load `references/github-pr-flow.md` for commands. Inspect branch, working tree, remotes, and repository default branch.
 
-Build and show a phase plan:
+Build and show a phase plan. The visible message must use this shape:
+
+```markdown
+**Release Plan**
+- Current branch:
+- Base branch:
+- Commit phase:
+- Rebase phase:
+- Jira phase:
+- Push/PR phase:
+- Reviewer phase:
+- Jira transition phase:
+- Remote mutations covered by this approval:
+- Things I will still ask about:
+
+Approve this release plan?
+```
+
+Fill every line with a concrete value such as `needed`, `skipped`, `automatic after PR`, or `will ask before running`. Include exact branch names, Jira issue keys/URLs when known, push commands when known, PR draft/ready intent, reviewer behavior, and Jira transition behavior. If a value is not known yet, say what local read-only step will resolve it inside the accepted plan.
+
+The plan must be in the final/user-visible response for the gate. Do not only summarize that a plan exists. Do not continue into commit, rebase, Jira creation/update, push, PR creation/update, reviewer request, or Jira transition until the user accepts this visible plan.
+
+Plan these phases:
 
 - Commit phase: needed if there are staged/unstaged changes or branch hygiene issues.
 - Rebase phase: recommended before PR unless the user explicitly skips.
@@ -96,7 +120,7 @@ Commit grouping guidance for the phase plan:
 - Keep docs/orchestration state in a separate `docs(...)` commit when it does not need to be bundled with runtime behavior.
 - If more than six commits seem necessary, call out that the package may be too broad or that some commits should be combined.
 
-Ask the user to accept the phase plan before changing local state.
+Ask the user to accept the visible phase plan before changing local state.
 
 ### 2. Commit Phase
 

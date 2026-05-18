@@ -28,7 +28,7 @@ Selection rule:
 - Else use `develop` if `origin/develop` exists.
 - Else use repository default branch from GitHub.
 
-Show the selected base in the PR plan.
+Show the selected base in the visible release/PR plan.
 
 ## Check Remote Branch State
 
@@ -38,7 +38,7 @@ Check whether current branch exists on origin:
 git ls-remote --heads origin <current-branch>
 ```
 
-If it does not exist, plan:
+If it does not exist, include this command in the visible release plan:
 
 ```bash
 git push -u origin <current-branch>
@@ -50,7 +50,7 @@ If it exists, inspect ahead/behind:
 git status --porcelain=v1 -b
 ```
 
-If history was rewritten, show and require explicit approval for:
+If history was rewritten, show this command in the visible release plan and require explicit approval for:
 
 ```bash
 git push --force-with-lease origin <current-branch>
