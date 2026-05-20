@@ -148,6 +148,12 @@ Rules:
 
 Review every package with `document_review`. Fix blockers before execution.
 
+Before document review, run the mechanical package checker:
+
+```bash
+python3 skills/krt-compound-master/scripts/check_work_package.py <work-package.md>
+```
+
 ## Human-Facing Handoff Text
 
 Keep internal planning identifiers out of public/reviewer-facing text:

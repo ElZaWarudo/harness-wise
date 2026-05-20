@@ -16,6 +16,11 @@ The marshal directs component skills instead of duplicating them:
 
 Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body details, base resolution, remote branch checks, and reviewer lookup.
 
+Use bundled scripts for mechanical guardrails when preparing a PR:
+
+- `scripts/check_pr_scope.py --base <base>...HEAD` to summarize human/generated/orchestration-doc lines and surface split warnings.
+- `scripts/check_pr_body.py --file <tmp-body-file>` before PR creation or update.
+
 ## Mandatory Rules
 
 - Use the host runtime's command wrapper only when the current repo requires one.
@@ -81,6 +86,7 @@ Load `references/github-pr-flow.md` for commands. Inspect branch, working tree, 
 
 Run a PR scope guardrail before building the plan:
 
+- Prefer running `scripts/check_pr_scope.py --base <base>...HEAD` after base resolution.
 - Compare changed files against any provided review-unit scope. If the diff includes unrelated review units, stop and ask whether to split or proceed with an explicit mixed-scope override.
 - Warn and prefer splitting when the diff mixes functional runtime code with `docs/brainstorms`, `docs/plans`, `docs/work-packages`, or `docs/orchestration/compound-master-state.md`.
 - Warn and prefer splitting when large generated artifacts, API bindings, schema dumps, or `*.auto.*` files dominate the diff or obscure functional review.
@@ -172,6 +178,7 @@ Before push or PR creation/update, show:
 - For CI fixes: affected workflow/job, local CI-equivalent command, result, and whether any targeted-only result is diagnostic rather than PR-ready evidence.
 - PR title.
 - PR body.
+- PR body check: `scripts/check_pr_body.py` result or why it was skipped.
 - Draft or ready status.
 - Jira links included.
 - Jira PR backlink plan: issue key, PR URL if already known or "created PR URL", and whether it will run automatically once the PR is ready for review.

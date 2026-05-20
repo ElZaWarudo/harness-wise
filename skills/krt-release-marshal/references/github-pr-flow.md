@@ -88,6 +88,12 @@ docs: clarify local Jira workflow setup
 
 ## PR Body
 
+Before creation or update, validate the body with:
+
+```bash
+python3 skills/krt-release-marshal/scripts/check_pr_body.py --file <tmp-body-file>
+```
+
 Default template:
 
 ```md
