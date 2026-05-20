@@ -151,7 +151,7 @@ Review every package with `document_review`. Fix blockers before execution.
 Before document review, run the mechanical package checker:
 
 ```bash
-python3 skills/krt-compound-master/scripts/check_work_package.py <work-package.md>
+python3 <compound-master-skill-dir>/scripts/check_work_package.py <work-package.md>
 ```
 
 ## Human-Facing Handoff Text

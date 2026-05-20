@@ -9,21 +9,21 @@ import sys
 from pathlib import Path
 
 
-FORBIDDEN = (
-    "stacked",
-    "stackeada",
-    "stack",
-    "retarget",
-    "retargetear",
-    "temporary base",
-    "base temporal",
-    "depends on",
-    "dependency pr",
-    "merge sequencing",
-    "reviewer",
-    "verification",
-    "tests pass",
-    "ci",
+FORBIDDEN_PATTERNS = (
+    (re.compile(r"\bstacked\b"), "stacked"),
+    (re.compile(r"\bstackeada\b"), "stackeada"),
+    (re.compile(r"\bstack\b"), "stack"),
+    (re.compile(r"\bretarget\w*\b"), "retarget"),
+    (re.compile(r"\bretargetear\w*\b"), "retargetear"),
+    (re.compile(r"\btemporary base\b"), "temporary base"),
+    (re.compile(r"\bbase temporal\b"), "base temporal"),
+    (re.compile(r"\bdepends on\b"), "depends on"),
+    (re.compile(r"\bdependency pr\b"), "dependency pr"),
+    (re.compile(r"\bmerge sequencing\b"), "merge sequencing"),
+    (re.compile(r"\breviewer\w*\b"), "reviewer"),
+    (re.compile(r"\bverification\b"), "verification"),
+    (re.compile(r"\btests pass\b"), "tests pass"),
+    (re.compile(r"\bci\b|\bcontinuous integration\b"), "CI"),
 )
 
 
@@ -46,9 +46,9 @@ def main() -> int:
         errors.append("PR body is empty")
 
     lowered = body.lower()
-    for term in FORBIDDEN:
-        if term in lowered:
-            errors.append(f"PR body contains forbidden operational context: {term!r}")
+    for pattern, label in FORBIDDEN_PATTERNS:
+        if pattern.search(lowered):
+            errors.append(f"PR body contains forbidden operational context: {label!r}")
 
     lines = [line.rstrip() for line in body.splitlines()]
     jira_lines = [line for line in lines if re.fullmatch(r"https?://\S+/browse/[A-Z][A-Z0-9]+-\d+", line)]

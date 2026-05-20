@@ -58,7 +58,7 @@ Each package must:
 - Align included/excluded/split/deferred origin plan units.
 - Define review units as the normal PR/Jira handoff units.
 - Justify any review unit that mixes runtime logic with large generated artifacts or orchestration docs.
-- Pass `scripts/check_work_package.py`.
+- Pass `<compound-master-skill-dir>/scripts/check_work_package.py`.
 - Pass `document_review`.
 
 If `mode:artifacts`, stop after artifact closeout with exact next invocation, including `review-unit:<RU#>` when known.

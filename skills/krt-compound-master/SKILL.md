@@ -50,8 +50,10 @@ Load only what the current phase needs:
 Before writing or reviewing a work package, run:
 
 ```bash
-python3 skills/krt-compound-master/scripts/check_work_package.py <work-package.md>
+python3 <compound-master-skill-dir>/scripts/check_work_package.py <work-package.md>
 ```
+
+Resolve `<compound-master-skill-dir>` to the directory containing this `SKILL.md`; in installed runtimes this may be `/home/teb/.agents/skills/krt-compound-master`, not `skills/krt-compound-master` inside the target repo.
 
 ## Core Pipeline
 

@@ -51,7 +51,8 @@ def main() -> int:
             errors.append("use PR body sentences, not PR body bullets")
 
     files_tests = section(text, "Files and Tests")
-    mixed_docs = [p for p in DOC_SECTIONS if p in text]
+    review_scope = f"{files_tests}\n{review_units}\n{handoff}"
+    mixed_docs = [p for p in DOC_SECTIONS if p in files_tests]
     runtime_hint = bool(re.search(r"\b(src|app|web-application|backend|frontend|lib)/", files_tests))
     if mixed_docs and runtime_hint:
         warnings.append(
@@ -59,7 +60,7 @@ def main() -> int:
             "ensure this is split into review units or explicitly justified"
         )
 
-    generated_hint = re.search(r"(\.auto\.|generated|bindings|definitions\.ts)", text, re.I)
+    generated_hint = re.search(r"(\.auto\.|generated|bindings|definitions\.ts)", review_scope, re.I)
     if generated_hint and "generated" not in review_units.lower():
         warnings.append("generated/mechanical artifacts detected; Review Units should isolate or justify them")
 

@@ -18,8 +18,9 @@ Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body detai
 
 Use bundled scripts for mechanical guardrails when preparing a PR:
 
-- `scripts/check_pr_scope.py --base <base>...HEAD` to summarize human/generated/orchestration-doc lines and surface split warnings.
-- `scripts/check_pr_body.py --file <tmp-body-file>` before PR creation or update.
+- Resolve `<release-marshal-skill-dir>` to the directory containing this `SKILL.md`; in installed runtimes this may be `/home/teb/.agents/skills/krt-release-marshal`, not `skills/krt-release-marshal` inside the target repo.
+- `<release-marshal-skill-dir>/scripts/check_pr_scope.py --base <base>...HEAD` to summarize human/generated/orchestration-doc lines, including untracked files by default, and surface split warnings.
+- `<release-marshal-skill-dir>/scripts/check_pr_body.py --file <tmp-body-file>` before PR creation or update.
 
 ## Mandatory Rules
 
@@ -86,34 +87,34 @@ Load `references/github-pr-flow.md` for commands. Inspect branch, working tree, 
 
 Run a PR scope guardrail before building the plan:
 
-- Prefer running `scripts/check_pr_scope.py --base <base>...HEAD` after base resolution.
+- Prefer running `<release-marshal-skill-dir>/scripts/check_pr_scope.py --base <base>...HEAD` after base resolution.
 - Compare changed files against any provided review-unit scope. If the diff includes unrelated review units, stop and ask whether to split or proceed with an explicit mixed-scope override.
 - Warn and prefer splitting when the diff mixes functional runtime code with `docs/brainstorms`, `docs/plans`, `docs/work-packages`, or `docs/orchestration/compound-master-state.md`.
 - Warn and prefer splitting when large generated artifacts, API bindings, schema dumps, or `*.auto.*` files dominate the diff or obscure functional review.
 - Treat >900 human-authored changed lines as a review-size warning and ~1,000+ human-authored changed lines as requiring a split/rationale before PR creation, excluding generated artifacts and orchestration docs counted separately.
 - If the user or enclosing workflow already approved a broad review unit, carry that rationale into the release plan, not the PR body.
 
-Build and show a phase plan. The visible message must use this shape:
+Build and show a phase plan in the user's language. For Spanish-language interactions, the visible message must use this shape:
 
 ```markdown
-**Release Plan**
-- Current branch:
-- Base branch:
-- Commit phase:
-- Rebase phase:
-- Jira phase:
-- Push/PR phase:
-- PR scope guardrail:
-- Reviewer phase:
-- Jira PR backlink phase:
-- Jira transition phase:
-- Remote mutations covered by this approval:
-- Things I will still ask about:
+**Plan de release**
+- Rama actual:
+- Rama base:
+- Fase de commits:
+- Fase de rebase:
+- Fase Jira:
+- Fase push/PR:
+- Guardarraíl de alcance de PR:
+- Fase de reviewers:
+- Fase de backlink PR en Jira:
+- Fase de transición Jira:
+- Mutaciones remotas cubiertas por esta aprobación:
+- Cosas sobre las que todavía preguntaré:
 
-Approve this release plan?
+¿Apruebas este plan de release?
 ```
 
-Fill every line with a concrete value such as `needed`, `skipped`, `automatic after PR`, `within review unit`, `split recommended`, or `will ask before running`. Include exact branch names, Jira issue keys/URLs when known, Spanish Jira summary/description to create when known, push commands when known, PR draft/ready intent, PR scope guardrail result, reviewer behavior, Jira PR backlink behavior, and Jira transition behavior. If a value is not known yet, say what local read-only step will resolve it inside the accepted plan.
+Fill every line with a concrete value in the same language as the labels, such as `necesaria`, `omitida`, `automática después de crear la PR`, `dentro de la review unit`, `conviene separar`, or `preguntaré antes de ejecutar`. Include exact branch names, Jira issue keys/URLs when known, Spanish Jira summary/description to create when known, push commands when known, PR draft/ready intent, PR scope guardrail result, reviewer behavior, Jira PR backlink behavior, and Jira transition behavior. If a value is not known yet, say what local read-only step will resolve it inside the accepted plan.
 
 The plan must be in the final/user-visible response for the gate. Do not only summarize that a plan exists. Do not continue into commit, rebase, Jira creation/update, push, PR creation/update, reviewer request, Jira PR backlink, or Jira transition until the user accepts this visible plan.
 
@@ -170,7 +171,7 @@ If required Jira env vars are missing, stop the Jira phase and ask whether to co
 
 Load `references/github-pr-flow.md` for base selection, remote branch state, PR content gathering, and body construction.
 
-Before push or PR creation/update, show:
+Before push or PR creation/update, show these fields in the user's language:
 
 - Current branch.
 - Base branch.
@@ -178,7 +179,7 @@ Before push or PR creation/update, show:
 - For CI fixes: affected workflow/job, local CI-equivalent command, result, and whether any targeted-only result is diagnostic rather than PR-ready evidence.
 - PR title.
 - PR body.
-- PR body check: `scripts/check_pr_body.py` result or why it was skipped.
+- PR body check: `<release-marshal-skill-dir>/scripts/check_pr_body.py` result or why it was skipped.
 - Draft or ready status.
 - Jira links included.
 - Jira PR backlink plan: issue key, PR URL if already known or "created PR URL", and whether it will run automatically once the PR is ready for review.

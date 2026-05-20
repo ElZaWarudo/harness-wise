@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 import subprocess
-import sys
 
 
 DOC_PREFIXES = (
@@ -38,6 +38,23 @@ def run_numstat(base: str | None) -> list[tuple[int, int, str]]:
     return rows
 
 
+def untracked_files() -> list[str]:
+    output = subprocess.check_output(
+        ["git", "ls-files", "--others", "--exclude-standard"],
+        text=True,
+    )
+    return [line for line in output.splitlines() if line]
+
+
+def count_lines(path: str) -> int:
+    data = Path(path).read_bytes()
+    if b"\0" in data:
+        return 0
+    if not data:
+        return 0
+    return data.count(b"\n") + (0 if data.endswith(b"\n") else 1)
+
+
 def is_doc(path: str) -> bool:
     return path.startswith(DOC_PREFIXES)
 
@@ -50,10 +67,17 @@ def is_generated(path: str) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="git diff base, for example origin/develop...HEAD")
+    parser.add_argument("--no-untracked", action="store_true", help="do not count untracked files")
     parser.add_argument("--fail-on-warning", action="store_true")
     args = parser.parse_args()
 
     rows = run_numstat(args.base)
+    untracked: set[str] = set()
+    if not args.no_untracked:
+        untracked = set(untracked_files())
+        for path in sorted(untracked):
+            rows.append((count_lines(path), 0, path))
+
     doc = gen = human = 0
     doc_files: list[str] = []
     gen_files: list[str] = []
@@ -83,6 +107,7 @@ def main() -> int:
     print(f"human_lines={human}")
     print(f"generated_lines={gen}")
     print(f"orchestration_doc_lines={doc}")
+    print(f"untracked_files_count={len(untracked)}")
     if doc_files:
         print("orchestration_doc_files:")
         for path in doc_files:
