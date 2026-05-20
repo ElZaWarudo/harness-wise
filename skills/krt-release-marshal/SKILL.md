@@ -1,17 +1,17 @@
 ---
 name: krt-release-marshal
-description: "Orchestrate the full delivery flow for the current project repository: direct krt-gitflow-knight for clean commits, krt-rebase-smith for clean branch history, krt-jira-scribe for Jira Server/Data Center issue work, then open a GitHub pull request with a factual body and Jira link. Use when the user asks to create/open a PR, prepare a pull request, ship current work, publish branch changes for review, or run the full gitflow + rebase + Jira + PR workflow. Runtime aliases may expose this as krt:release-marshal."
+description: "Orchestrate the full delivery flow for the current project repository: direct krt-gitflow-knight for clean commits, krt-rebase-smith for clean branch history, krt-jira-scribe for Jira Server/Data Center issue work, then open a GitHub pull request with bidirectional Jira/PR links. Use when the user asks to create/open a PR, prepare a pull request, ship current work, publish branch changes for review, or run the full gitflow + rebase + Jira + PR workflow. Runtime aliases may expose this as krt:release-marshal."
 ---
 
 # Release Marshal
 
-Orchestrate the normal KRT delivery flow: commit -> rebase -> Jira -> push/PR -> reviewers -> Jira review transition. Do not introduce a separate "commit-task-PR" mode.
+Orchestrate the normal KRT delivery flow: commit -> rebase -> Jira -> push/PR -> reviewers -> Jira PR backlink -> Jira review transition. Do not introduce a separate "commit-task-PR" mode.
 
 The marshal directs component skills instead of duplicating them:
 
 - `krt-gitflow-knight` (`krt:gitflow-knight`) owns branch hygiene, staging, and commit planning.
 - `krt-rebase-smith` (`krt:rebase-smith`) owns clean branch history and safe rebase decisions.
-- `krt-jira-scribe` (`krt:jira-scribe`) owns Jira issue/subtask lookup, creation proposals, sprint handling, and transitions.
+- `krt-jira-scribe` (`krt:jira-scribe`) owns Jira issue/subtask lookup, creation proposals, sprint handling, PR backlinks, comments, and transitions.
 - `gh` owns GitHub remote state, push/PR operations, and reviewer requests after release-plan confirmation.
 
 Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body details, base resolution, remote branch checks, and reviewer lookup.
@@ -53,7 +53,7 @@ Ask before destructive, irreversible, external, or notification-causing work unl
 - Reviewer requests.
 - Remote branch rewrites.
 
-One explicit release-plan approval may cover reviewer requests and automatic post-PR Jira transition to `En Revisión` if the plan names the behavior and fallback. For Jira transition, the plan must name the issue and target status. For reviewer requests, the plan may name explicit reviewers or authorize automatic lookup and request of a clear inferred human reviewer.
+One explicit release-plan approval may cover reviewer requests, automatic post-PR Jira PR backlinking, and automatic post-PR Jira transition to `En Revisión` if the plan names the behavior and fallback. For Jira PR backlinking, the plan must name the issue and PR link behavior. For Jira transition, the plan must name the issue and target status. For reviewer requests, the plan may name explicit reviewers or authorize automatic lookup and request of a clear inferred human reviewer.
 
 ## Inputs
 
@@ -89,6 +89,7 @@ Build and show a phase plan. The visible message must use this shape:
 - Jira phase:
 - Push/PR phase:
 - Reviewer phase:
+- Jira PR backlink phase:
 - Jira transition phase:
 - Remote mutations covered by this approval:
 - Things I will still ask about:
@@ -96,9 +97,9 @@ Build and show a phase plan. The visible message must use this shape:
 Approve this release plan?
 ```
 
-Fill every line with a concrete value such as `needed`, `skipped`, `automatic after PR`, or `will ask before running`. Include exact branch names, Jira issue keys/URLs when known, Spanish Jira summary/description to create when known, push commands when known, PR draft/ready intent, reviewer behavior, and Jira transition behavior. If a value is not known yet, say what local read-only step will resolve it inside the accepted plan.
+Fill every line with a concrete value such as `needed`, `skipped`, `automatic after PR`, or `will ask before running`. Include exact branch names, Jira issue keys/URLs when known, Spanish Jira summary/description to create when known, push commands when known, PR draft/ready intent, reviewer behavior, Jira PR backlink behavior, and Jira transition behavior. If a value is not known yet, say what local read-only step will resolve it inside the accepted plan.
 
-The plan must be in the final/user-visible response for the gate. Do not only summarize that a plan exists. Do not continue into commit, rebase, Jira creation/update, push, PR creation/update, reviewer request, or Jira transition until the user accepts this visible plan.
+The plan must be in the final/user-visible response for the gate. Do not only summarize that a plan exists. Do not continue into commit, rebase, Jira creation/update, push, PR creation/update, reviewer request, Jira PR backlink, or Jira transition until the user accepts this visible plan.
 
 Plan these phases:
 
@@ -107,7 +108,8 @@ Plan these phases:
 - Jira phase: needed if the user wants a Jira link or the project requires it.
 - PR phase: always included.
 - Reviewer phase: after PR creation, request explicit reviewers or infer one clear reviewer when the accepted plan includes automatic reviewer handling; otherwise ask or skip according to user preference.
-- Jira transition phase: after PR creation, move the associated Jira task to `En Revisión` when Jira context exists and the accepted plan included that transition; otherwise ask.
+- Jira PR backlink phase: after a ready PR exists, add the PR URL back to the associated Jira task/subtask when Jira context exists and the accepted plan included that backlink; otherwise ask.
+- Jira transition phase: after a ready PR exists, move the associated Jira task to `En Revisión` when Jira context exists and the accepted plan included that transition; otherwise ask.
 
 When commit work is needed, include proposed branch and commit grouping when practical. If grouping needs more inspection, make that the next local step inside the same acceptance gate rather than adding another branch/commit confirmation.
 
@@ -161,7 +163,8 @@ Before push or PR creation/update, show:
 - PR body.
 - Draft or ready status.
 - Jira links included.
-- Jira transition plan: issue key, current status if known, target `En Revisión`, and whether it will run automatically after PR creation.
+- Jira PR backlink plan: issue key, PR URL if already known or "created PR URL", and whether it will run automatically once the PR is ready for review.
+- Jira transition plan: issue key, current status if known, target `En Revisión`, and whether it will run automatically once the PR is ready for review.
 - Reviewer plan: explicit reviewers, automatic inferred reviewer lookup/request, or skipped.
 
 Ask for approval before the next remote mutation.
@@ -182,11 +185,13 @@ If the user provided reviewers and the accepted plan did not already approve rev
 
 If no reviewers were provided, infer candidates from recent merged PR approvals against the same base. Exclude bots, duplicates, and the author/current GitHub user. If no clear reviewers remain, say so and skip assignment. If the accepted plan included automatic inferred reviewer lookup/request, add the single clear reviewer without asking a second time; otherwise ask before adding inferred reviewers.
 
-### 8. Closeout And Jira Review Transition
+### 8. Closeout, Jira PR Backlink, And Review Transition
 
 After PR creation, return PR number, URL, base branch, head branch, Jira link if included, and draft/ready state.
 
-If Jira context was included and the approved plan included review transition, use `krt-jira-scribe` to inspect real transitions and move the associated Jira issue to `En Revisión` without asking again. If `En Revisión` is unavailable, the issue key is ambiguous, or the approved plan did not include automatic transition, ask before transitioning.
+If Jira context was included, the PR is ready for review, and the approved plan included Jira PR backlinking, use `krt-jira-scribe` to add the PR URL back to the associated Jira issue without asking again. Prefer a Jira remote link plus a concise Spanish comment. If the issue key is ambiguous, the PR is still draft, or the approved plan did not include automatic backlinking, ask or report the deferred action instead of updating Jira silently.
+
+If Jira context was included, the PR is ready for review, and the approved plan included review transition, use `krt-jira-scribe` to inspect real transitions and move the associated Jira issue to `En Revisión` without asking again. If `En Revisión` is unavailable, the issue key is ambiguous, the PR is still draft, or the approved plan did not include automatic transition, ask before transitioning.
 
 ## PR-Only Mode
 

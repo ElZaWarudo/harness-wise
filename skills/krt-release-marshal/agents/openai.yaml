@@ -1,4 +1,4 @@
 interface:
   display_name: "krt-release-marshal"
-  short_description: "Drive commit, rebase, Jira, and PR delivery flow"
-  default_prompt: "Use krt-release-marshal to coordinate commit planning, safe rebasing, Jira handling, and GitHub PR creation."
+  short_description: "Drive commit, rebase, Jira, PR, and backlink flow"
+  default_prompt: "Use krt-release-marshal to coordinate commit planning, safe rebasing, Jira handling, GitHub PR creation, and bidirectional PR/Jira links."

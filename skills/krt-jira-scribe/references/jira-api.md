@@ -146,6 +146,40 @@ curl -sS -f -X POST -H "Authorization: Bearer $JIRA_API_TOKEN" \
 
 If `JIRA_BOARD_ID` is defined, use it directly. If not and a single board candidate exists, use it. If multiple boards or no active sprint exist, ask or continue without sprint only when the user already approved not blocking.
 
+## PR Backlinks And Comments
+
+Add or update a Jira remote link to the GitHub PR:
+
+```bash
+curl -sS -f -X POST -H "Authorization: Bearer $JIRA_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{
+    "globalId": "github-pr:https://github.com/example/repo/pull/123",
+    "object": {
+      "url": "https://github.com/example/repo/pull/123",
+      "title": "GitHub PR #123",
+      "icon": {
+        "url16x16": "https://github.githubassets.com/favicons/favicon.png",
+        "title": "GitHub"
+      }
+    }
+  }' \
+  "$JIRA_BASE_URL/rest/api/2/issue/$ISSUE_KEY/remotelink"
+```
+
+If the same `globalId` already exists, Jira updates that remote link instead of creating a duplicate. Use a deterministic `globalId` such as `github-pr:$PR_URL`.
+
+Add a Spanish comment with the PR URL:
+
+```bash
+curl -sS -f -X POST -H "Authorization: Bearer $JIRA_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{"body":"PR lista para revisión: https://github.com/example/repo/pull/123"}' \
+  "$JIRA_BASE_URL/rest/api/2/issue/$ISSUE_KEY/comment"
+```
+
+For `POST`, capture status code and response body so Jira permission or validation errors can be shown to the user. Never print token values.
+
 ## Transitions
 
 Get transitions:

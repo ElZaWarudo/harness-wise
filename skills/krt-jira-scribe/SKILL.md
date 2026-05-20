@@ -1,13 +1,13 @@
 ---
 name: krt-jira-scribe
-description: Manages Jira Server/Data Center issues on a Spanish-language instance. Verifies existing global issues and subtasks, checks whether new work belongs under an existing parent, proposes Spanish issue/subtask creation when missing, handles active sprint placement, and manages Spanish transitions. Runtime aliases may expose this as krt:jira-scribe.
+description: Manages Jira Server/Data Center issues on a Spanish-language instance. Verifies existing global issues and subtasks, checks whether new work belongs under an existing parent, proposes Spanish issue/subtask creation when missing, handles active sprint placement, adds PR backlinks/comments, and manages Spanish transitions. Runtime aliases may expose this as krt:jira-scribe.
 ---
 
 # Jira Scribe
 
-Manage Jira Server/Data Center issues safely in Spanish. This skill verifies existing global issues and subtasks, prefers fitting new work under existing parent issues, proposes creation only when the right Jira shape is clear, and handles final status transitions.
+Manage Jira Server/Data Center issues safely in Spanish. This skill verifies existing global issues and subtasks, prefers fitting new work under existing parent issues, proposes creation only when the right Jira shape is clear, records PR backlinks on Jira issues, and handles final status transitions.
 
-Since Jira is a shared external system, never create issues, subtasks, comments, or transitions without explicit confirmation. Confirmation may come from the current Jira prompt or from an accepted `krt-release-marshal` plan that explicitly names the issue, target status, and automatic post-PR transition behavior.
+Since Jira is a shared external system, never create issues, subtasks, PR backlinks, comments, or transitions without explicit confirmation. Confirmation may come from the current Jira prompt or from an accepted `krt-release-marshal` plan that explicitly names the issue, PR backlink behavior, target status, and automatic post-PR behavior.
 
 Load `references/jira-api.md` for exact `curl` commands, JSON payloads, active sprint API calls, transition calls, and HTTP error handling.
 
@@ -96,7 +96,24 @@ When the user provides a parent key:
 
 If Jira returns required-field errors, show missing fields and ask. Do not guess custom field IDs.
 
-### 5. Confirm Final Status
+### 5. Add PR Backlink To Jira Issue
+
+When a PR exists and the associated Jira issue/subtask should point back to it:
+
+1. Verify the issue key and fetch the issue summary/status.
+2. Prefer creating a Jira remote link to the PR with a stable `globalId` based on the PR URL.
+3. Add a concise Spanish comment such as `PR lista para revisión: <PR_URL>` when the user or accepted `krt-release-marshal` plan approved comments/backlinking.
+4. Do not edit the issue description or custom fields to store the PR URL unless the user explicitly asks; avoid guessing Jira custom field IDs.
+5. If the PR is still draft and the caller asked to update Jira only when the PR is ready for review, report the backlink as deferred instead of updating Jira.
+
+If called by `krt-release-marshal` after PR creation and the accepted release plan already approved automatic Jira PR backlinking:
+
+1. Require an unambiguous issue/subtask key and a concrete PR URL.
+2. Add or update the Jira remote link without asking a second time.
+3. Add the Spanish PR-ready comment without asking a second time if the plan named comment/backlink behavior.
+4. Report issue key, PR URL, remote link result, comment result, and whether any step was deferred.
+
+### 6. Confirm Final Status
 
 When completing work:
 
@@ -139,7 +156,14 @@ Before transitioning an issue, show:
 - Target transition.
 - Transition ID.
 
-Do not execute remote changes until the user confirms. For release-marshal initiated post-PR transitions, the accepted release plan counts as confirmation only when it explicitly approved automatic transition of the named Jira issue to `En Revisión`.
+Before adding a PR backlink/comment, show:
+
+- Issue key.
+- PR URL.
+- Remote link title.
+- Comment text, if adding a comment.
+
+Do not execute remote changes until the user confirms. For release-marshal initiated post-PR backlinks, the accepted release plan counts as confirmation only when it explicitly approved automatic backlinking of the named Jira issue to the PR URL that will be created or updated in that flow. For release-marshal initiated post-PR transitions, the accepted release plan counts as confirmation only when it explicitly approved automatic transition of the named Jira issue to `En Revisión`.
 
 ## Final Summary
 
@@ -147,5 +171,6 @@ Always end with:
 
 - Parent issue: key, URL, status, created yes/no.
 - Subtask: key, URL, status, created yes/no.
+- PR backlink: yes/no/deferred.
 - Transitioned: yes/no.
 - Next action.
