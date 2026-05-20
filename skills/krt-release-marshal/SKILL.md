@@ -33,7 +33,7 @@ Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body detai
 - Before pushing or updating a PR with a CI-fix commit, require evidence that the repo-specific command equivalent to the affected CI job passed locally, or present the missing validation clearly and ask for explicit override before the remote mutation.
 - Do not ask for Jira credentials. If required Jira env vars are missing, continue without Jira only if the user approves.
 - Use `--force-with-lease`, never plain `--force`, when a rewritten branch must be pushed.
-- Prefer concise PR bodies: change bullets first, Jira URL last, no section headings unless the repo template requires them.
+- Prefer strict PR bodies: one factual change sentence per line, blank line, then the immediately relevant Jira URL. Do not include stack context, retargeting plans, base-branch notes, reviewer instructions, verification, or any operational commentary unless the repo template explicitly requires it.
 - Prefer reviewable logical commits over package-sized commits when the pending work has clear boundaries. A work package may be one PR with several commits.
 - Use one or two commits only when the change truly has one or two coherent concerns. Do not compress broad feature work into "implementation" plus "docs" when the diff spans persistence, services, API contracts, generated surfaces, tests, and configuration.
 

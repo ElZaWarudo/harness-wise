@@ -91,22 +91,32 @@ docs: clarify local Jira workflow setup
 Default template:
 
 ```md
-- <change>
-- <change>
+<Change sentence.>
+<Change sentence.>
 
 <JIRA_URL>
 ```
 
 Rules:
 
-- Put changes first and Jira URL last.
-- Omit headings by default.
+- Put only the changes contained in this PR first, one factual sentence per line, and the Jira URL last after a blank line.
+- Omit headings.
 - Do not distinguish parent vs subtask unless the user asks.
 - Include only the immediately relevant Jira URL, usually the subtask/work-package issue for this PR. Do not include both parent and child links unless the user or repo template asks.
 - Omit Jira URL if Jira context is missing.
-- Include verification only if the user asks, the repo requires it, or the PR template requires it.
-- Treat upstream test results as readiness context, not body content.
+- Do not mention stacked PR relationships, temporary bases, future retargeting, dependency PRs, reviewer instructions, or merge sequencing.
+- Do not include verification unless the repo template requires it. Treat upstream test results as readiness context, not body content.
 - Keep the body factual.
+
+Example:
+
+```md
+Adds central regulatory summary publishing with central-client API key and tenant ownership checks.
+Adds regulator metadata/proof query API with scoped pseudonyms, no-payload validation, and audit records.
+Adds regulatory-api manifest discovery, central-client publishing support, and generated API bindings.
+
+$JIRA_HOST/browse/PDP-93
+```
 
 ## Create PR
 
