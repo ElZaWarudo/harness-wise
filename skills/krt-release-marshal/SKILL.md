@@ -34,7 +34,7 @@ Load `references/github-pr-flow.md` for exact `git`/`gh` commands, PR body detai
 - Do not ask for Jira credentials. If required Jira env vars are missing, continue without Jira only if the user approves.
 - Use `--force-with-lease`, never plain `--force`, when a rewritten branch must be pushed.
 - Prefer strict PR bodies: one factual change sentence per line, blank line, then the immediately relevant Jira URL. Do not include stack context, retargeting plans, base-branch notes, reviewer instructions, verification, or any operational commentary unless the repo template explicitly requires it.
-- Prefer reviewable logical commits over package-sized commits when the pending work has clear boundaries. A work package may be one PR with several commits.
+- Prefer reviewable PRs and logical commits over package-sized PRs when the pending work has clear boundaries. A work package may produce several review-unit PRs; a single PR should represent one focused review unit unless a broad unit was explicitly approved.
 - Use one or two commits only when the change truly has one or two coherent concerns. Do not compress broad feature work into "implementation" plus "docs" when the diff spans persistence, services, API contracts, generated surfaces, tests, and configuration.
 
 ## Approval Policy
@@ -60,6 +60,7 @@ One explicit release-plan approval may cover reviewer requests, automatic post-P
 Use context already provided by the user or previous skills:
 
 - Desired workflow scope: full flow or PR-only.
+- Review unit scope from Compound Master, when provided.
 - Jira parent issue key, subtask key, or issue URL.
 - Suggested Jira summary/description from an enclosing workflow. Treat these as semantic input, not final text; normalize them into Spanish before Jira creation proposals.
 - Target/base branch.
@@ -78,6 +79,14 @@ If the user asks simply to create a PR and there are uncommitted changes or no J
 
 Load `references/github-pr-flow.md` for commands. Inspect branch, working tree, remotes, and repository default branch.
 
+Run a PR scope guardrail before building the plan:
+
+- Compare changed files against any provided review-unit scope. If the diff includes unrelated review units, stop and ask whether to split or proceed with an explicit mixed-scope override.
+- Warn and prefer splitting when the diff mixes functional runtime code with `docs/brainstorms`, `docs/plans`, `docs/work-packages`, or `docs/orchestration/compound-master-state.md`.
+- Warn and prefer splitting when large generated artifacts, API bindings, schema dumps, or `*.auto.*` files dominate the diff or obscure functional review.
+- Treat >900 human-authored changed lines as a review-size warning and ~1,000+ human-authored changed lines as requiring a split/rationale before PR creation, excluding generated artifacts and orchestration docs counted separately.
+- If the user or enclosing workflow already approved a broad review unit, carry that rationale into the release plan, not the PR body.
+
 Build and show a phase plan. The visible message must use this shape:
 
 ```markdown
@@ -88,6 +97,7 @@ Build and show a phase plan. The visible message must use this shape:
 - Rebase phase:
 - Jira phase:
 - Push/PR phase:
+- PR scope guardrail:
 - Reviewer phase:
 - Jira PR backlink phase:
 - Jira transition phase:
@@ -97,7 +107,7 @@ Build and show a phase plan. The visible message must use this shape:
 Approve this release plan?
 ```
 
-Fill every line with a concrete value such as `needed`, `skipped`, `automatic after PR`, or `will ask before running`. Include exact branch names, Jira issue keys/URLs when known, Spanish Jira summary/description to create when known, push commands when known, PR draft/ready intent, reviewer behavior, Jira PR backlink behavior, and Jira transition behavior. If a value is not known yet, say what local read-only step will resolve it inside the accepted plan.
+Fill every line with a concrete value such as `needed`, `skipped`, `automatic after PR`, `within review unit`, `split recommended`, or `will ask before running`. Include exact branch names, Jira issue keys/URLs when known, Spanish Jira summary/description to create when known, push commands when known, PR draft/ready intent, PR scope guardrail result, reviewer behavior, Jira PR backlink behavior, and Jira transition behavior. If a value is not known yet, say what local read-only step will resolve it inside the accepted plan.
 
 The plan must be in the final/user-visible response for the gate. Do not only summarize that a plan exists. Do not continue into commit, rebase, Jira creation/update, push, PR creation/update, reviewer request, Jira PR backlink, or Jira transition until the user accepts this visible plan.
 
@@ -107,6 +117,7 @@ Plan these phases:
 - Rebase phase: recommended before PR unless the user explicitly skips.
 - Jira phase: needed if the user wants a Jira link or the project requires it.
 - PR phase: always included.
+- PR scope guardrail: validate that the PR contains one focused review unit; separate docs/orchestration and generated artifacts unless approved.
 - Reviewer phase: after PR creation, request explicit reviewers or infer one clear reviewer when the accepted plan includes automatic reviewer handling; otherwise ask or skip according to user preference.
 - Jira PR backlink phase: after a ready PR exists, add the PR URL back to the associated Jira task/subtask when Jira context exists and the accepted plan included that backlink; otherwise ask.
 - Jira transition phase: after a ready PR exists, move the associated Jira task to `En Revisión` when Jira context exists and the accepted plan included that transition; otherwise ask.
@@ -138,7 +149,7 @@ Unless the user explicitly skips history cleanup, load and follow `krt-rebase-sm
 
 If Jira context was provided, keep it.
 
-If Jira context is missing and Jira should be included, load and follow `krt-jira-scribe`. Use Jira Server/Data Center only. For PRs that look like a work package or one item in a larger delivery sequence, prefer finding or creating a parent task plus a subtask for the PR. Create a standalone task only when the work is clearly standalone or the user requests it. Before proposing creation, derive Spanish Jira text:
+If Jira context is missing and Jira should be included, load and follow `krt-jira-scribe`. Use Jira Server/Data Center only. For PRs that look like a review unit inside a larger delivery sequence, prefer finding or creating a parent task plus a subtask for the PR. Create a standalone task only when the work is clearly standalone or the user requests it. Before proposing creation, derive Spanish Jira text:
 
 - Summary: concise Spanish action phrase, no branch prefixes, no Conventional Commit type, no Jira key, no Compound Master IDs, and no package/date numbers.
 - Description: 1-3 concise Spanish sentences explaining what must be done and why.

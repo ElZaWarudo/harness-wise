@@ -12,9 +12,17 @@ Path:
 docs/work-packages/RDM-###-<roadmap-item-slug>/YYYY-MM-DD-NNN-<package-slug>-work-package.md
 ```
 
-Use a work package as the atomic PR/Jira unit. It may include one roadmap item, one plan U-ID, or a cohesive group of U-IDs. Do not store all work packages in one flat directory; organize them under the roadmap item folder they belong to.
+Use a work package as a delivery container. Its review units are the default atomic PR/Jira units. A work package may include one roadmap item, one plan U-ID, or a cohesive group of U-IDs, but it should define smaller review units when the package spans multiple review surfaces. Do not store all work packages in one flat directory; organize them under the roadmap item folder they belong to.
 
-Split when units have independent value, minimal file overlap, separate risk domains, and clean independent verification. Combine when units share migrations/API contracts/core files, depend tightly on each other, or would create noisy stacked PRs. A package may implement the full roadmap item in one integrated PR only when the plan units have strong integration/dependency coupling; this must be explicit in the grouping rationale.
+Split review units when units have independent value, minimal file overlap, separate risk domains, clean independent verification, large generated artifacts, large schema dumps, or orchestration docs that would obscure functional review. Combine only when units share migrations/API contracts/core files, depend tightly on each other, or would create noisier stacked PRs than a single review. A package may implement the full roadmap item in one integrated PR only when the plan units have strong integration/dependency coupling; this must be explicit in the grouping rationale.
+
+Review-unit size guardrails:
+
+- Target <=500 human-authored changed lines per PR.
+- Treat >900 human-authored changed lines as a warning requiring split consideration.
+- Require an explicit split/rationale above ~1,000 human-authored changed lines.
+- Count generated artifacts, `*.auto.*` dumps, and orchestration docs separately; separate them from functional logic when they dominate review volume.
+- Do not mix `docs/brainstorms`, `docs/plans`, `docs/work-packages`, or `docs/orchestration/compound-master-state.md` into functional PRs unless the PR is documentation/orchestration or the user approves the mixed surface.
 
 Work packages must align with origin plan units. A package may combine or split units, but it must make that relationship explicit and justify it. If a plan defines U1-U5, the package must say which of those units are included, excluded, deferred, or split into another package.
 
@@ -29,6 +37,7 @@ origin_planning_input: docs/brainstorms/...
 origin_plan: docs/plans/...
 units: [U1, U2]
 unit_alignment: complete|partial|split
+review_units: [RU1, RU2]
 base_branch: [integration branch or parent branch]
 pr_strategy: [independent|stacked]
 jira_policy: [required|optional|skip]
@@ -68,10 +77,20 @@ autonomy: [manual|guarded|high]
 | U1 | yes/no/partial | [Why included, excluded, deferred, or split] |
 
 Grouping rationale:
-- [Why these units belong in the same PR/Jira unit, or why this package contains only part of the roadmap item]
+- [Why these units belong in this package, where review-unit boundaries are drawn, and why any integrated PR is justified]
 
 ## Implementation Units
 [Relevant U-ID summaries, preserving origin plan unit names and order]
+
+## Review Units
+| Review unit | Scope | Expected changed surfaces | PR base | Jira issue/subtask | Size/risk note |
+|---|---|---|---|---|---|
+| RU1 | [focused reviewable change] | [runtime/tests/generated/docs/etc.] | [develop/parent branch] | [new/reuse/skip] | [line estimate, generated/docs separated yes/no, split rationale if broad] |
+
+Rules:
+- Review units are the default PR/Jira handoff units.
+- Keep docs/orchestration and large generated artifacts in separate review units unless coupling makes that more confusing than helpful.
+- If one review unit includes runtime logic plus generated files, require separate commit grouping for generated files and keep PR body sentences focused on user/reviewer-visible changes.
 
 ## Files and Tests
 [Repo-relative files and expected tests]
@@ -108,13 +127,14 @@ Grouping rationale:
 - Escalation rule: [record release-follow-up blocker until the CI incident has cause, owner, and next action]
 
 ## Branch and PR Handoff Inputs
-- Branch name: [feat/package-slug-without-plan-number]
+- Review unit: [RU# and title]
+- Branch name: [feat/review-unit-slug-without-plan-number]
 - PR base: [develop/main/parent branch]
-- Suggested commit grouping:
+- Suggested commit grouping for this review unit:
   - [type(scope): summary] - [repo-relative files or surfaces] - [why this is one logical review unit]
   - [Split broad packages by changed surface: persistence/schema/model state; domain service/integration behavior; API/controller/generated contracts; config/deployment wiring; focused tests/fixtures; docs/orchestration. Omit surfaces that did not change.]
 - PR title:
-- PR body bullets:
+- PR body sentences:
 - Verification results location:
 - Production/deployment notes: [required for live/unknown systems when behavior, schema, config, or deployment changes; otherwise none]
 
@@ -137,7 +157,7 @@ Keep internal planning identifiers out of public/reviewer-facing text:
 - Jira summaries should be in Spanish and read like work items a teammate would understand without the orchestration plan.
 - Jira descriptions should be in Spanish and explain scope and reason in concise prose, not restate roadmap IDs or package numbers.
 - PR titles and commit messages should be value-oriented and conventional; put traceability in artifact metadata, PR dependency notes, or Jira links instead of the title.
-- When commit messages or PR bodies include Jira traceability, include only the immediately relevant issue link/key, usually the subtask for this PR/work package. Do not include both parent and child unless the user or repo convention explicitly asks.
+- When commit messages or PR bodies include Jira traceability, include only the immediately relevant issue link/key, usually the subtask for this review-unit PR. Do not include both parent and child unless the user or repo convention explicitly asks.
 - Keep IDs only in internal fields such as `roadmap_item`, `units`, origin paths, dependency tables, and state.
 
 ## Artifact Closeout
@@ -155,7 +175,7 @@ When `mode:artifacts` stops, include:
 - Exact next invocation, for example:
 
 ```text
-Use krt-compound-master mode:execute package:<work-package-path> jira-policy:<required|optional|skip> parallel:false
+Use krt-compound-master mode:execute package:<work-package-path> review-unit:<RU#> jira-policy:<required|optional|skip> parallel:false
 ```
 
 If no package is ready, say exactly why. If packages are ready, say artifact generation is complete and execution is intentionally waiting for an explicit user gate.

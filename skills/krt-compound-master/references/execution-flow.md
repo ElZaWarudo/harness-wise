@@ -14,7 +14,7 @@ Before selecting workers or reviewer subagents, resolve `delegation` and `autono
 - Record the resolved mode in `compound-master-state.md` with scope, selected autonomy, selected delegation, and any runtime limitation.
 - If subagents are denied or unavailable, continue inline rather than stopping.
 
-Classify packages:
+Classify packages and review units:
 
 - Independent: no hard dependency and no dangerous file overlap.
 - Dependent: requires another package, branch, PR, schema, API, or merged change.
@@ -24,16 +24,16 @@ Classify packages:
 
 Rules:
 
-- Independent packages may branch from the integration base.
-- Dependent packages wait for merge or become stacked PRs based on parent branch.
-- Overlapping/high-risk packages run serially unless the user explicitly accepts risk and isolation exists.
-- Production-sensitive packages run serially by default, require explicit compatibility/rollback evidence, and cannot intentionally break existing behavior without recorded user approval.
+- Independent review units may branch from the integration base.
+- Dependent review units wait for merge or become stacked PRs based on parent branch.
+- Overlapping/high-risk review units run serially unless the user explicitly accepts risk and isolation exists.
+- Production-sensitive review units run serially by default, require explicit compatibility/rollback evidence, and cannot intentionally break existing behavior without recorded user approval.
 - Prototype packages may run with lighter compatibility gates, but still require explicit approval for destructive data operations, credential/security weakening, or public contract removal.
 - `parallel:false` forces serial execution.
 - `parallel:true` requires isolated worktrees/checkouts and non-overlapping scopes.
 - Parallel subagents without isolation must not stage, commit, push, create PRs, transition Jira, or run broad mutation-prone flows.
 
-If execution was requested without `package:`, select the first unblocked package from the earliest safe wave, state why, and continue unless this changes scope, requires a stacked branch decision, or conflicts with user-provided ordering.
+If execution was requested without `package:`, select the first unblocked package and first ready review unit from the earliest safe wave, state why, and continue unless this changes scope, requires a stacked branch decision, or conflicts with user-provided ordering. If the package has no review units, derive them before execution using the review-unit guardrails from `artifact-templates.md`.
 
 ## Delegation Decision Matrix
 
@@ -41,10 +41,10 @@ Use this matrix after autonomy/delegation resolution and before launching KRT-ow
 
 | Package shape | Default delegation choice |
 |---|---|
-| Small package, same-file edits, sequential steps, or tightly coupled decisions | Run inline. The coordination overhead is higher than the benefit. |
+| Small review unit, same-file edits, sequential steps, or tightly coupled decisions | Run inline. The coordination overhead is higher than the benefit. |
 | Many files to inspect (roughly 30+), scattered docs/contracts, or uncertain local conventions | Launch one read-only `explorer`; under `guarded`, this does not need a user gate. The explorer returns an execution context packet. |
-| Clear implementation scope, defined file ownership, explicit verification, autonomy contract present, and no product decision remaining | Launch at most one mutating `worker` for the package. Under `guarded`, do this without asking when isolation and branch/base are safe. |
-| Fresh perspective needed after implementation, or the package touches risky surfaces | Use the main `code_review` role and optional read-only reviewer fan-out within budget. Read-only fan-out is automatic under `guarded` when it materially reduces risk. |
+| Clear review-unit scope, defined file ownership, explicit verification, autonomy contract present, and no product decision remaining | Launch at most one mutating `worker` for the review unit. Under `guarded`, do this without asking when isolation and branch/base are safe. |
+| Fresh perspective needed after implementation, or the review unit touches risky surfaces | Use the main `code_review` role and optional read-only reviewer fan-out within budget. Read-only fan-out is automatic under `guarded` when it materially reduces risk. |
 | Independent packages with non-overlapping write sets and isolated worktrees/checkouts | Parallel workers are allowed only when `parallel:true`, `autonomy:high`, and isolation are all present. |
 | Overlapping files, unclear ownership, missing isolation, or product/branch decisions still open | Run serially inline or stop for the missing decision. |
 
@@ -62,7 +62,7 @@ An agent that hits an escalation point should pause only that decision. It shoul
 
 Delegation budgets:
 
-- At most one mutating worker per work package.
+- At most one mutating worker per review unit.
 - At most three read-only reviewer subagents in review fan-out.
 - Do not add a second user gate for read-only exploration, Impact Scan helpers, security watchers, or reviewer fan-out after autonomy has been resolved.
 - Do not launch more generic agents to compensate for low-confidence output. Perform one targeted follow-up exploration or review with a narrower prompt.
@@ -85,12 +85,12 @@ Carry production posture into every worker prompt. For `production:live` or `pro
 
 Carry the work package's autonomy contract into every worker prompt. Tell the worker to decide reversible, package-local, convention-following choices directly; record assumptions and low-risk deviations; and escalate only the blocked decision categories named in the contract.
 
-Preserve plan-unit granularity during execution. A work package is the PR/Jira unit, not a license to flatten the origin plan. Before invoking `work`, extract the package's implementation units from the work package and origin plan. Track each unit's status in `compound-master-state.md` as pending, in-progress, implemented, verified, skipped, or blocked.
+Preserve plan-unit and review-unit granularity during execution. A work package is not automatically the PR/Jira unit. Before invoking `work`, extract the selected review unit plus the implementation units it covers from the work package and origin plan. Track each review unit and included plan unit in `compound-master-state.md` as pending, in-progress, implemented, verified, skipped, blocked, review-passed, or release-handed-off.
 
-When a package contains multiple units, choose one of these execution shapes and record why:
+When a work package contains multiple review units or implementation units, choose one of these execution shapes and record why:
 
-- **Sequential unit loop:** invoke `work` one unit at a time when units have different risk surfaces, separate verification gates, unclear boundaries, or likely review/fix loops.
-- **Single worker, explicit unit checklist:** invoke one worker for the whole package only when the units are tightly coupled and one pass is more coherent. The prompt must still list each U-ID/unit separately and require a per-unit result.
+- **Sequential review-unit loop:** invoke `work` one review unit at a time when units have different risk surfaces, separate verification gates, generated/docs noise, unclear boundaries, or likely review/fix loops.
+- **Single worker, explicit review-unit checklist:** invoke one worker for multiple review units only when they are tightly coupled and one pass is more coherent. The prompt must still list each review unit and U-ID/unit separately and require per-review-unit results.
 - **Parallel workers:** only when `parallel:true`, isolation exists, dependencies allow it, and write scopes do not overlap.
 
 ## Security Watch During Work
@@ -135,7 +135,9 @@ Invocation shape:
 ```text
 Skill("<work>", "<work-package-path>
 
-Execution constraint: implement this package only and run the verification you can run inside your assigned scope. Use the package autonomy contract: decide reversible, package-local, convention-following choices; record assumptions; escalate only non-inferable product, contract, security, production, branch/base, Jira/PR, credential, or scope decisions. Preserve the origin plan's implementation units: for each included U-ID/unit, report status, changed files, verification attempted/results/skips, and blockers. Do not invoke PR creation, ce-commit-push-pr, Jira transitions, or any shipping workflow. Leave pending commits/changes for the lead and krt-release-marshal. Return changed files, API/contract changes detected, verification attempted, verification results, skipped verification with reasons, decisions made autonomously, and any unresolved questions. Do not ask the user to take over normal local verification or review.")
+Review unit: <RU# and title>
+
+Execution constraint: implement only the selected review unit and run the verification you can run inside your assigned scope. Use the package autonomy contract: decide reversible, package-local, convention-following choices; record assumptions; escalate only non-inferable product, contract, security, production, branch/base, Jira/PR, credential, or scope decisions. Preserve the origin plan's implementation units: for each included U-ID/unit, report status, changed files, verification attempted/results/skips, and blockers. Do not implement later review units unless required to keep this unit coherent and explicitly recorded. Do not invoke PR creation, ce-commit-push-pr, Jira transitions, or any shipping workflow. Leave pending commits/changes for the lead and krt-release-marshal. Return changed files, API/contract changes detected, verification attempted, verification results, skipped verification with reasons, decisions made autonomously, and any unresolved questions. Do not ask the user to take over normal local verification or review.")
 ```
 
 Completion gate:
@@ -148,7 +150,7 @@ Completion gate:
 - Consumer-derived tests from the Impact Scan run, or documented as skipped with concrete local blocker and CI coverage expectation.
 - Verification gate passes or a documented gap is acceptable under package risk.
 - Task tracker shows implementation complete.
-- Pending changes/commits are coherent and ready for `krt-release-marshal`.
+- Pending changes/commits are coherent for one review unit and ready for `krt-release-marshal`.
 - No unresolved product decision remains.
 
 Verification ladder:
@@ -158,7 +160,7 @@ Verification ladder:
 - Before release handoff or PR update for a CI fix, run the repo-specific command equivalent to the affected CI job, derived from workflow config, package scripts, Makefiles, task runners, or documented local commands.
 - If the CI-equivalent command cannot run locally, record the concrete blocker and pass that as an explicit verification gap to `krt-release-marshal`; do not treat targeted-only evidence as enough for a PR update.
 
-After worker return, the lead must inspect the summary/diff by unit, update unit statuses, collect Security Watch notes when enabled, start documented local services when safe, run the package verification gate or closest targeted tests, fix straightforward failures inline or through `work`, and continue to review only when all units have a non-pending disposition. Stop only for missing credentials, destructive setup, paid external resources, unclear environment decisions, non-inferable product/technical decisions, or obvious P0/P1 security risk.
+After worker return, the lead must inspect the summary/diff by review unit and plan unit, update statuses, collect Security Watch notes when enabled, start documented local services when safe, run the review-unit verification gate or closest targeted tests, fix straightforward failures inline or through `work`, and continue to review only when the selected review unit has a non-pending disposition. Stop only for missing credentials, destructive setup, paid external resources, unclear environment decisions, non-inferable product/technical decisions, or obvious P0/P1 security risk.
 
 ## Impact Scan Gate
 
@@ -374,9 +376,10 @@ When CI break-prevention evidence is recorded and implementation and review gate
 Handoff prompt shape:
 
 ```text
-Skill("<project_pr>", "Run the full krt-release-marshal workflow for this completed work package.
+Skill("<project_pr>", "Run the full krt-release-marshal workflow for this completed review unit.
 
 Work package: <work-package-path>
+Review unit: <RU# and title>
 Roadmap item: RDM-###
 Origin plan: <origin-plan-path>
 Current branch: <branch-name>
@@ -385,13 +388,13 @@ Jira policy: <required|optional|skip>
 Suggested Jira summary: <Spanish summary>
 Suggested Jira description: <Spanish description>
 Suggested PR title: <title>
-Suggested PR body bullets:
-- <change>
-- <change>
-Suggested commit grouping:
+Suggested PR body sentences:
+<change sentence>
+<change sentence>
+Suggested commit grouping for this review unit:
 - <type(scope): summary> -- <files/surfaces> -- <why this is one logical review unit>
 - <type(scope): summary> -- <files/surfaces> -- <why this is separate or bundled>
-- Split broad packages by changed surface when applicable: persistence/schema/model state; domain service/integration behavior; API/controller/generated contracts; config/deployment wiring; focused tests/fixtures; docs/orchestration. Do not default to one implementation commit plus one docs commit for multi-surface feature work.
+- Split broad review units by changed surface when applicable: persistence/schema/model state; domain service/integration behavior; API/controller surfaces; generated contracts; config/deployment wiring; focused tests/fixtures; docs/orchestration. Do not default to one implementation commit plus one docs commit for multi-surface feature work.
 Verification results for release-readiness only, not PR body copy:
 - <command/result>
 Impact Scan for release-readiness only:
@@ -399,15 +402,15 @@ Impact Scan for release-readiness only:
 CI risk notes for release-readiness only:
 - <changed CI surface/local equivalent command/result or CI-only gap>
 
-Use krt-release-marshal exactly. Do not run tests unless the user explicitly asks; use the verification results and CI risk notes above only to decide readiness. Do not include tests, verification summaries, or CI risk notes in the PR body unless the user, repo template, or project convention explicitly requires them. Include automatic reviewer handling in the release plan: use explicit reviewers if provided, otherwise infer a clear reviewer after PR creation and request review without asking a second time; skip reviewer assignment if no clear human reviewer exists. Include automatic post-PR Jira transition to En Revisión in the release plan when Jira context exists; after PR creation, use krt-jira-scribe and the real transition list to perform that approved transition without asking a second time.")
+Use krt-release-marshal exactly. Do not run tests unless the user explicitly asks; use the verification results and CI risk notes above only to decide readiness. Do not include tests, verification summaries, stack/dependency context, future retargeting notes, or CI risk notes in the PR body unless the user, repo template, or project convention explicitly requires them. Include automatic reviewer handling in the release plan: use explicit reviewers if provided, otherwise infer a clear reviewer after PR creation and request review without asking a second time; skip reviewer assignment if no clear human reviewer exists. Include automatic post-PR Jira transition to En Revisión in the release plan when Jira context exists; after PR creation, use krt-jira-scribe and the real transition list to perform that approved transition without asking a second time.")
 ```
 
-Suggested Jira summary/description must be semantic Spanish text. PR title/body bullets, branch name, suggested commit groups, and eventual commit messages must be semantic and follow repository language/conventions. Do not include roadmap IDs, U-IDs, package numbers, date sequences, or other Compound Master numbering unless the user or repo convention explicitly requires them.
+Suggested Jira summary/description must be semantic Spanish text. PR title/body sentences, branch name, suggested commit groups, and eventual commit messages must be semantic and follow repository language/conventions. Do not include roadmap IDs, U-IDs, package numbers, date sequences, or other Compound Master numbering unless the user or repo convention explicitly requires them.
 
 PR tree safety:
 
 - Independent PRs target integration/default branch.
-- Stacked PRs target parent package branch and declare dependency in PR body.
+- Stacked PRs target parent review-unit branch. Keep dependency, stack, and future-retarget context in Compound Master state, Jira/internal notes, or the release plan; do not put it in the PR body.
 - When the user asks to continue while a parent PR is pending merge, prefer the next ready package as a stacked PR from the parent PR branch when dependencies and review scope allow it.
 - If stacked PRs are awkward but the next package can proceed, record the exact clean-tree strategy and intended `krt-rebase-smith` normalization path before starting work.
 - Waiting for merge is a blocker only when the next package needs the merged artifact, the parent PR has unresolved release-follow-up blockers, or no clean branch/base strategy can be named.

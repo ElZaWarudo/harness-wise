@@ -3,7 +3,7 @@ name: krt-compound-master
 description: >
   Discovery-gated artifact-first orchestrator for compound-engineering product delivery. Resolves roadmap/readiness generation,
   runs brainstorm/plan/document-review loops, derives
-  mergeable work packages, and later executes each package through resolved work/code-review roles before
+  mergeable work packages with focused review units, and later executes each review unit through resolved work/code-review roles before
   handing shipping to krt-release-marshal with CI break-prevention evidence. Use when turning an existing documented software project
   into a sequenced roadmap and PR/Jira delivery program. Runtime aliases may expose this as
   krt:compound-master.
@@ -19,7 +19,8 @@ Argument hint:
 [initiative description or docs path]
 [mode:artifacts|mode:execute|mode:full|mode:resume]
 [package:<work-package-path>]
-[pr-granularity:auto|roadmap-item|plan-unit]
+[review-unit:<RU#>]
+[pr-granularity:auto|review-unit|work-package|roadmap-item|plan-unit]
 [jira-policy:required|optional|skip]
 [production:unknown|live|preprod|prototype]
 [parallel:true|false]
@@ -42,14 +43,14 @@ Core pipeline:
 7. Run one plan per reviewed requirements artifact.
 8. Review each plan with the resolved document-review role.
 9. Confirm roadmap, brainstorm/requirements, and plan reviews have passed before deriving work packages.
-10. Derive work packages that map to independently reviewable PR/Jira units.
-11. Review work packages with the resolved document-review role before execution.
-12. Execute each ready package with the resolved work role in implementation-only/no-shipping mode.
+10. Derive work packages with focused review units; review units are the default PR/Jira units.
+11. Review work packages and their review-unit breakdown with the resolved document-review role before execution.
+12. Execute each ready review unit with the resolved work role in implementation-only/no-shipping mode.
 13. Keep Security Sentinel watch active by default for high-risk packages during execution, collecting read-only notes as files change.
 14. Review implementation with the resolved code-review role, looping fixes until the configured threshold passes.
 15. After the work-review loop finishes, run the resolved security review role for high-risk packages before release handoff, using watch notes as input.
 16. Record CI break-prevention evidence before handoff; if CI later breaks, escalate to the dedicated CI investigation workflow.
-17. Hand the finished package to `krt-release-marshal`, which owns commits, clean rebase, Jira, GitHub PR, reviewer requests, and approved post-PR Jira transition to `En Revisión`.
+17. Hand the finished review unit to `krt-release-marshal`, which owns commits, clean rebase, Jira, GitHub PR, reviewer requests, PR backlinking, and approved post-PR Jira transition to `En Revisión`.
 
 ## Load References
 
@@ -76,8 +77,11 @@ Core pipeline:
 - Treat `production:prototype` as permission to move faster only after recording that posture. Even then, do not remove user data, credentials, security controls, or documented contracts without explicit approval.
 - Use repo-relative paths in generated documents.
 - Do not edit CE plan bodies as progress checklists. Progress lives in `compound-master-state.md`, work-package status, task tracking, commits, Jira, and PRs.
-- A PR unit is a **work package**, not every plan bullet. Avoid PR-per-microtask.
-- A work package may contain multiple plan implementation units. It may implement all units from a roadmap item in one integrated PR only when there is strong integration/dependency coupling, and that rationale must be recorded. Executing one package in one run must not erase that structure: preserve the U-ID/unit sequence in prompts, progress state, verification, review, release handoff, and summary. If the plan defines three units, the execution should report those three unit outcomes even when one worker implements them in a single pass.
+- A PR unit is a **review unit**, not automatically a work package and not every plan bullet. Avoid PR-per-microtask, but split broad work packages into focused review units when review would otherwise be noisy.
+- A work package may contain multiple plan implementation units and multiple review units. It may ship as one integrated PR only when there is strong integration/dependency coupling, minimal generated/docs noise, and a recorded rationale. Executing one package in one run must not erase that structure: preserve the U-ID/unit sequence and review-unit sequence in prompts, progress state, verification, review, release handoff, and summary.
+- Use these review-unit guardrails by default: target <=500 human-authored changed lines, treat >900 human-authored changed lines as a warning, and require an explicit split/rationale above ~1,000 human-authored changed lines. Count generated artifacts, schema dumps, and orchestration docs separately; separate them from functional logic when they dominate the diff or make review harder.
+- Do not mix `docs/brainstorms`, `docs/plans`, `docs/work-packages`, or `docs/orchestration/compound-master-state.md` into functional PRs unless the PR is explicitly documentation/orchestration or the user approves the mixed surface.
+- Put large generated artifacts or mechanical `*.auto.*` outputs in a separate review unit/commit when practical. If they must ship with functional code, isolate them in commit grouping and keep them out of PR body change sentences unless they are the user-facing change.
 - Keep planning IDs out of human-facing release text. `RDM-001`, `U1`, date sequences, and package numbers may appear in metadata, paths, dependency tables, and state, but not in suggested Jira summaries/descriptions, commit messages, PR titles, PR body bullets, or branch names unless the user or repo convention explicitly requires them.
 - Do not let the work phase invoke its own PR/shipping flow. Shipping is delegated to `krt-release-marshal`.
 - Do not open PRs from protected branches: `main`, `master`, or `develop`.
@@ -89,7 +93,7 @@ Core pipeline:
 - Verification evidence must be surface-aware for broad packages. Do not record only "tests pass"; record the changed surfaces and the evidence for each relevant surface, such as permissions/role-bundle checks, normalization checks, endpoint gates, tenant isolation, generated client contracts, migrations, config, and docs.
 - Use a verification ladder before release handoff and CI-fix PR updates: targeted command for diagnosis, natural sub-suite for the affected area when setup is shared, repo-specific command equivalent to the affected CI job for shipping evidence. Derive the final command from the project's workflow/job definition or documented scripts; do not hardcode commands from another project.
 - Treat targeted selectors as diagnostic-only when tests depend on global hooks, shared fixtures, seeded state, or suite-level setup. If a selector fails differently from CI because setup is incomplete, validate with the natural suite or CI-equivalent job command before handoff.
-- For broad packages, provide suggested logical commit grouping to `krt-release-marshal`. Prefer reviewable commits by natural boundary, while keeping each commit internally coherent. Do not collapse persistence/schema, service/integration behavior, API/generated contracts, config/deployment wiring, focused tests, and docs into one or two package-sized commits when those surfaces changed separately.
+- For broad packages, provide review units and suggested logical commit grouping to `krt-release-marshal`. Prefer reviewable PRs by natural boundary, while keeping each PR/commit internally coherent. Do not collapse persistence/schema, service/integration behavior, API/controller surfaces, generated contracts, config/deployment wiring, focused tests, and docs into one package-sized PR when those surfaces can be reviewed separately.
 - Treat PR creation as a handoff milestone, not proof that CI is healthy. Compound Master should prevent predictable CI breaks before handoff by expanding contract tests, verification evidence, and release notes. If CI later fails, do not spin in an observation loop; invoke or recommend the dedicated CI investigation workflow and keep the package marked as release-follow-up until the incident has an owner.
 - Never ask for Jira credentials. Missing Jira env vars are a configuration blocker or a user-approved no-Jira exception, depending on `jira-policy`.
 
@@ -297,15 +301,15 @@ Invoke the resolved `plan` role for each reviewed `planning_input_path`. Verify 
 
 ### Step 5 - Derive Work Packages
 
-Load `references/artifact-templates.md`. Create independently reviewable packages under roadmap-item folders in `docs/work-packages/RDM-###-<roadmap-item-slug>/`. Each package must align explicitly to the origin plan units it includes, excludes, splits, or combines. Review every package with `document_review`. If `mode:artifacts`, stop only after an explicit artifact closeout and exact next invocation.
+Load `references/artifact-templates.md`. Create delivery packages under roadmap-item folders in `docs/work-packages/RDM-###-<roadmap-item-slug>/`, with focused review units inside each package. Each package must align explicitly to the origin plan units it includes, excludes, splits, or combines, and must justify any review unit that mixes runtime logic with large generated artifacts or orchestration docs. Review every package with `document_review`. If `mode:artifacts`, stop only after an explicit artifact closeout and exact next invocation.
 
 ### Step 6 - Execution Wave Planning
 
-Load `references/execution-flow.md`. Resolve autonomy and the execution delegation gate before planning KRT-owned mutating subagents. Apply the delegation decision matrix, budget, and telemetry rules before launching any subagent. Classify packages as independent, dependent, overlapping, or high-risk. Execute serially unless `parallel:true`, `autonomy:high`, and isolation make parallel work safe.
+Load `references/execution-flow.md`. Resolve autonomy and the execution delegation gate before planning KRT-owned mutating subagents. Apply the delegation decision matrix, budget, and telemetry rules before launching any subagent. Classify packages and review units as independent, dependent, overlapping, or high-risk. Execute serially unless `parallel:true`, `autonomy:high`, and isolation make parallel work safe.
 
-### Step 7 - Execute Package
+### Step 7 - Execute Review Unit
 
-Invoke the resolved `work` role in implementation-only/no-shipping mode. For high-risk packages, start Security Sentinel watch by default before or alongside work execution. The watch is read-only and tracks changed files, risky surfaces, missing negative tests, and likely gate inputs without mutating code or blocking normal progress except for obvious P0/P1 risk. The worker returns changed files, verification attempted/results/skips, and questions. The lead inspects the diff, integrates security watch notes, starts documented local services when safe, runs/attempts verification, fixes straightforward failures inline or via `work`, and continues to review.
+Invoke the resolved `work` role in implementation-only/no-shipping mode for the selected review unit. For high-risk review units, start Security Sentinel watch by default before or alongside work execution. The watch is read-only and tracks changed files, risky surfaces, missing negative tests, and likely gate inputs without mutating code or blocking normal progress except for obvious P0/P1 risk. The worker returns changed files, verification attempted/results/skips, and questions. The lead inspects the diff, integrates security watch notes, starts documented local services when safe, runs/attempts verification, fixes straightforward failures inline or via `work`, and continues to review.
 
 ### Step 8 - Code Review And Fix Loop
 
@@ -321,11 +325,11 @@ Load `references/execution-flow.md`. Before release handoff, record the CI break
 
 ### Step 11 - Release Marshal Handoff
 
-When CI break-prevention evidence is recorded and implementation and review gates pass, invoke `krt-release-marshal`. Do not stop after saying it is the next step. Include work package path, roadmap item, origin plan, current branch, intended base, Jira policy, suggested Jira summary/description, PR title/body bullets, suggested commit grouping when natural boundaries exist, verification results and CI risk notes as internal release-readiness context, and instruction to include automatic reviewer handling and automatic post-PR Jira transition to `En Revisión` in the release plan when Jira context exists.
+When CI break-prevention evidence is recorded and implementation and review gates pass for the selected review unit, invoke `krt-release-marshal`. Do not stop after saying it is the next step. Include work package path, review unit, roadmap item, origin plan, current branch, intended base, Jira policy, suggested Jira summary/description, PR title/body sentences, suggested commit grouping when natural boundaries exist, verification results and CI risk notes as internal release-readiness context, and instruction to include automatic reviewer handling, PR backlinking, and automatic post-PR Jira transition to `En Revisión` in the release plan when Jira context exists.
 
 ### Step 12 - Continue Waves Or Finish
 
-Refresh state, dependencies, and the integration base after each PR handoff. Before continuing while a parent PR is pending, fetch and inspect the branch that receives PRs (`develop` when present, otherwise the GitHub default or recorded release base). Compare it with the current/parent PR branch, note new commits or likely conflicts in state, and only then decide whether to continue from the parent PR branch as a stacked PR or record another explicit clean-tree strategy that `krt-rebase-smith` can normalize later. Dependent packages wait for merge when the next package needs the merged artifact, the refreshed base changes package assumptions, or the package cannot be stacked cleanly. At the end, write `docs/orchestration/YYYY-MM-DD-compound-master-summary.md`.
+Refresh state, dependencies, and the integration base after each PR handoff. Before continuing while a parent PR is pending, fetch and inspect the branch that receives PRs (`develop` when present, otherwise the GitHub default or recorded release base). Compare it with the current/parent PR branch, note new commits or likely conflicts in state, and only then decide whether to continue from the parent review-unit branch as a stacked PR or record another explicit clean-tree strategy that `krt-rebase-smith` can normalize later. Dependent review units wait for merge when the next unit needs the merged artifact, the refreshed base changes assumptions, or the unit cannot be stacked cleanly. At the end, write `docs/orchestration/YYYY-MM-DD-compound-master-summary.md`.
 
 ### Cross-Cutting State Archive Hygiene
 
