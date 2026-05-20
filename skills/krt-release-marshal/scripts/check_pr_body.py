@@ -57,15 +57,20 @@ def main() -> int:
             errors.append("Jira URL must be the last line")
         jira_index = lines.index(jira_lines[-1])
         if jira_index > 0 and lines[jira_index - 1] != "":
-            errors.append("Jira URL must be separated from change sentences by a blank line")
+            errors.append("Jira URL must be separated from change bullets by a blank line")
     elif any("/browse/" in line for line in lines):
         errors.append("Jira link does not match expected /browse/KEY-N format")
 
     for line in lines:
         if line.startswith("#") or line.startswith("##"):
             errors.append("PR body must not include headings")
-        if line.startswith("- "):
-            errors.append("Use one factual sentence per line, not markdown bullets")
+    jira_index = lines.index(jira_lines[-1]) if jira_lines else len(lines)
+    change_lines = [line for line in lines[:jira_index] if line]
+    if not change_lines:
+        errors.append("PR body must include at least one change bullet before the Jira URL")
+    for line in change_lines:
+        if not line.startswith("- "):
+            errors.append("Use markdown bullets for change lines")
 
     for error in errors:
         print(f"ERROR: {error}", file=sys.stderr)

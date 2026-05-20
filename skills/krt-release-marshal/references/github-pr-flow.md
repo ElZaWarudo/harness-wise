@@ -66,6 +66,14 @@ git diff --name-status <base>...HEAD
 git diff --stat <base>...HEAD
 ```
 
+Run the PR scope guardrail before presenting the release plan:
+
+```bash
+python3 <release-marshal-skill-dir>/scripts/check_pr_scope.py --base <base>...HEAD --fail-on-blocking
+```
+
+If it prints `BLOCKING:`, the release plan must ask for an explicit split decision or oversized-PR approval before any PR creation/update. Advisory `WARNING:` output may proceed only when it is visible in the plan.
+
 Check for existing PR:
 
 ```bash
@@ -97,15 +105,15 @@ python3 <release-marshal-skill-dir>/scripts/check_pr_body.py --file <tmp-body-fi
 Default template:
 
 ```md
-<Change sentence.>
-<Change sentence.>
+- <Change sentence.>
+- <Change sentence.>
 
 <JIRA_URL>
 ```
 
 Rules:
 
-- Put only the changes contained in this PR first, one factual sentence per line, and the Jira URL last after a blank line.
+- Put only the changes contained in this PR first, one factual markdown bullet per line, and the Jira URL last after a blank line.
 - Omit headings.
 - Do not distinguish parent vs subtask unless the user asks.
 - Include only the immediately relevant Jira URL, usually the subtask/work-package issue for this PR. Do not include both parent and child links unless the user or repo template asks.

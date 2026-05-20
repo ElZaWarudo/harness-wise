@@ -69,6 +69,11 @@ def main() -> int:
     parser.add_argument("--base", help="git diff base, for example origin/develop...HEAD")
     parser.add_argument("--no-untracked", action="store_true", help="do not count untracked files")
     parser.add_argument("--fail-on-warning", action="store_true")
+    parser.add_argument(
+        "--fail-on-blocking",
+        action="store_true",
+        help="exit 1 when the diff requires explicit split/oversized approval",
+    )
     args = parser.parse_args()
 
     rows = run_numstat(args.base)
@@ -94,15 +99,16 @@ def main() -> int:
             human += total
 
     warnings: list[str] = []
+    blocking: list[str] = []
     if human > 1000:
-        warnings.append(f"human-authored diff is ~{human} lines; split or record rationale")
+        blocking.append(f"human-authored diff is ~{human} lines; split or approve oversized PR")
     elif human > 900:
         warnings.append(f"human-authored diff is ~{human} lines; review-size warning")
 
     if doc and human:
-        warnings.append("orchestration/planning docs are mixed with functional files")
+        blocking.append("orchestration/planning docs are mixed with functional files")
     if gen and human and gen >= human * 0.5:
-        warnings.append("generated/mechanical files dominate or substantially obscure functional review")
+        blocking.append("generated/mechanical files dominate or substantially obscure functional review")
 
     print(f"human_lines={human}")
     print(f"generated_lines={gen}")
@@ -119,8 +125,12 @@ def main() -> int:
 
     for warning in warnings:
         print(f"WARNING: {warning}")
+    for item in blocking:
+        print(f"BLOCKING: {item}")
 
-    if warnings and args.fail_on_warning:
+    if (warnings or blocking) and args.fail_on_warning:
+        return 1
+    if blocking and args.fail_on_blocking:
         return 1
     return 0
 

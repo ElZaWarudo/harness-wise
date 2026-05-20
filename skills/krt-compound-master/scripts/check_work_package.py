@@ -47,8 +47,10 @@ def main() -> int:
     else:
         if "Review unit:" not in handoff:
             errors.append("handoff inputs must name the selected Review unit")
-        if "PR body bullets" in handoff:
-            errors.append("use PR body sentences, not PR body bullets")
+        if "PR body bullets" not in handoff:
+            errors.append("handoff inputs must include PR body bullets")
+        if "PR body sentences" in handoff:
+            errors.append("use PR body bullets, not PR body sentences")
 
     files_tests = section(text, "Files and Tests")
     review_scope = f"{files_tests}\n{review_units}\n{handoff}"

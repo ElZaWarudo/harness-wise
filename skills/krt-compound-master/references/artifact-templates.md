@@ -134,7 +134,7 @@ Rules:
   - [type(scope): summary] - [repo-relative files or surfaces] - [why this is one logical review unit]
   - [Split broad packages by changed surface: persistence/schema/model state; domain service/integration behavior; API/controller/generated contracts; config/deployment wiring; focused tests/fixtures; docs/orchestration. Omit surfaces that did not change.]
 - PR title:
-- PR body sentences:
+- PR body bullets:
 - Verification results location:
 - Production/deployment notes: [required for live/unknown systems when behavior, schema, config, or deployment changes; otherwise none]
 

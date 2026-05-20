@@ -19,9 +19,9 @@ Jira policy: <required|optional|skip>
 Suggested Jira summary: <Spanish summary>
 Suggested Jira description: <Spanish description>
 Suggested PR title: <title>
-Suggested PR body sentences:
-<change sentence>
-<change sentence>
+Suggested PR body bullets:
+- <change sentence>
+- <change sentence>
 Suggested commit grouping for this review unit:
 - <type(scope): summary> -- <files/surfaces> -- <why this is one logical review unit>
 - <type(scope): summary> -- <files/surfaces> -- <why this is separate or bundled>
@@ -35,7 +35,7 @@ CI risk notes for release-readiness only:
 Use krt-release-marshal exactly. Do not run tests unless the user explicitly asks; use verification and CI notes only to decide readiness. Do not include tests, verification summaries, stack/dependency context, future retargeting notes, or CI risk notes in the PR body unless the user, repo template, or project convention explicitly requires them. Include automatic reviewer handling in the release plan. Include automatic post-PR Jira backlinking and Jira transition to En Revisión when Jira context exists.")
 ```
 
-Suggested Jira summary/description must be semantic Spanish text. PR title/body sentences, branch name, suggested commit groups, and commit messages must be semantic and follow repo conventions. Do not include roadmap IDs, U-IDs, package numbers, date sequences, or other Compound Master numbering unless the user or repo convention explicitly requires them.
+Suggested Jira summary/description must be semantic Spanish text. PR title/body bullets, branch name, suggested commit groups, and commit messages must be semantic and follow repo conventions. Do not include roadmap IDs, U-IDs, package numbers, date sequences, or other Compound Master numbering unless the user or repo convention explicitly requires them.
 
 ## PR Tree Safety
 
